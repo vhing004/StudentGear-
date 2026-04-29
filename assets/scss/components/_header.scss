@@ -1,0 +1,117 @@
+// HEADER
+.header {
+  width: 100%;
+  height: 100px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+  z-index: 1000;
+  box-shadow: 0 0 10px #ccc;
+
+  &_container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  &_nav {
+    width: 100%;
+    height: 60px;
+    background-color: $bg_color;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    & .container {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+    }
+  }
+
+  &_logo {
+    text-decoration: none;
+    display: block;
+    text-transform: uppercase;
+    font-size: 25px;
+    font-weight: 700;
+    color: $main-color;
+  }
+
+  &_search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid $main-color;
+    border-radius: 12px;
+    height: 40px;
+    max-width: 550px;
+    width: 100%;
+    &-btn {
+      all: unset;
+      border-left: 1px solid #ccc;
+      border-radius: 12px;
+      font-size: 15px;
+      background-color: $main-color;
+      line-height: 40px;
+      padding: 0 15px;
+      color: $bg_color;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    & input {
+      all: unset;
+      width: 100%;
+      padding: 5px 0 5px 15px;
+      font-size: 15px;
+      color: $color_w;
+      transition: width 0.5s ease;
+    }
+  }
+
+  &_menu {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    &-btn {
+      font-size: 15px;
+      line-height: 14px;
+      text-decoration: none;
+      color: $color_w;
+      font-weight: 500;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      & i {
+        font-size: 20px;
+      }
+    }
+  }
+  &_list {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    &-item {
+      &--link {
+        font-size: 15px;
+        color: $bg_color;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-weight: bold;
+      }
+    }
+  }
+  &_category {
+    width: 100%;
+    // height: 40px;
+    background-color: $main-color;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "techshop",
+  "version": "1.0.0",
+  "description": "Website bán đồ công nghệ giá rẻ cho sinh viên - PHP + MySQL",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "watch": "vite build --watch",
+    "sass": "sass --watch assets/scss:assets/css --style=compressed --no-source-map"
+  },
+  "devDependencies": {
+    "sass": "^1.77.0",
+    "vite": "^5.2.0"
+  }
+}
