@@ -116,7 +116,7 @@
                 $sql_products = "SELECT * FROM products 
                          WHERE category_id = $cat_id AND is_active = 1 
                          ORDER BY is_featured DESC, created_at DESC 
-                         LIMIT 5";
+                         LIMIT 10";
                 $res_products = $conn->query($sql_products);
 
                 // Chỉ hiển thị danh mục nếu có ít nhất 1 sản phẩm

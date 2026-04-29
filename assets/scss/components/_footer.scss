@@ -1,0 +1,119 @@
+.footer {
+  font-family: "Arial", sans-serif;
+  color: #333;
+  background: #ffeb01;
+  padding: 40px 0;
+  margin-top: 30px;
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  &__left {
+    flex: 1;
+    & li {
+      margin-bottom: 10px;
+      font-size: 16px;
+      line-height: 1.6;
+      font-weight: 700;
+    }
+    & iframe {
+      margin-top: 15px;
+      width: 250px;
+      height: 250px;
+    }
+    &-bottom {
+      display: flex;
+      //   justify-content: space-around;
+      gap: 50px;
+    }
+  }
+  &__top {
+    display: flex;
+    gap: 40px;
+    justify-content: space-between;
+    flex: 1;
+  }
+
+  &__title {
+    color: #d0021c;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+
+    &--news {
+      margin-top: 25px;
+    }
+  }
+
+  &__list {
+    list-style: none;
+    padding: 0;
+    a {
+      &:hover {
+        color: #d0021c;
+      }
+      &.highlight {
+        color: #d0021c;
+      }
+    }
+  }
+
+  &__sub-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #d0021c;
+    margin: 20px 0 10px;
+  }
+
+  &__link-map {
+    font-size: 14px;
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  &__form {
+    display: flex;
+    margin-top: 15px;
+    input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 25px 0 0 25px;
+      background: #f9f9f9;
+    }
+    button {
+      padding: 10px 25px;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 0 25px 25px 0;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  }
+
+  &__bottom {
+    background-color: #ffed00; // Màu vàng đặc trưng ở hình
+    padding: 20px 0;
+    font-size: 13px;
+  }
+
+  &__info-company {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+  }
+
+  &__copyright {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}

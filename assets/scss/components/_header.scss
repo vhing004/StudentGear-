@@ -54,6 +54,8 @@
       border-left: 1px solid #ccc;
       border-radius: 12px;
       font-size: 15px;
+      width: 40px;
+      text-align: center;
       background-color: $main-color;
       line-height: 40px;
       padding: 0 15px;
@@ -84,9 +86,28 @@
       text-transform: uppercase;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 10px;
       & i {
         font-size: 20px;
+      }
+    }
+  }
+  &_cart {
+    &-wrap {
+      position: relative;
+      & .header_cart-notice {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        width: 18px;
+        height: 18px;
+        background-color: red;
+        color: #fff;
+        border-radius: 50%;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     }
   }
@@ -107,11 +128,111 @@
   }
   &_category {
     width: 100%;
-    // height: 40px;
     background-color: $main-color;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100%;
+  }
+}
+
+.header_user {
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 0 10px;
+  cursor: pointer;
+
+  // Khi di chuột vào khối user thì hiện menu
+  &:hover .header_user-menu {
+    display: block;
+  }
+
+  &-info {
+    display: flex;
+    align-items: center;
+  }
+
+  &-img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+  }
+
+  &-name {
+    margin-left: 6px;
+    font-size: 14px;
+    font-weight: 400;
+    color: $main-color;
+  }
+
+  // Dropdown Menu
+  &-menu {
+    position: absolute;
+    z-index: 100;
+    padding: 8px 0;
+    top: calc(100% + 8px); // Cách header một khoảng nhỏ
+    right: 0;
+    width: 170px;
+    background-color: #fff;
+    border-radius: 2px;
+    list-style: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    display: none; // Mặc định ẩn
+    animation: fadeIn ease-in 0.2s;
+
+    // Lớp đệm để không bị mất hover khi di chuyển chuột xuống
+    &::before {
+      content: "";
+      position: absolute;
+      top: -15px;
+      right: 0;
+      width: 100%;
+      height: 20px;
+      display: block;
+    }
+
+    // Mũi tên nhọn hướng lên
+    &::after {
+      content: "";
+      position: absolute;
+      right: 12px;
+      top: -16px;
+      border-width: 8px 12px;
+      border-style: solid;
+      border-color: transparent transparent #fff transparent;
+    }
+  }
+
+  &-item {
+    &--separate {
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    a {
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+      padding: 8px 16px;
+      display: block;
+
+      &:hover {
+        background-color: #f8f8f8;
+        color: #d0021c;
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
