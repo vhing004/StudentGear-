@@ -59,7 +59,7 @@
                 ?>
                         <article class="hot_list__item">
                             <div class="hot_list__media">
-                                <a href="detail.php?slug=<?= $row['slug'] ?>">
+                                <a href="<?php echo BASE_URL ?>pages/detail_product.php?product_id=<?php echo $row['id']; ?>">
                                     <img src="<?= $row['image'] ?>" alt="<?= $row['name'] ?>" class="hot_list__img">
                                 </a>
                                 <?php if ($discount > 0): ?>
@@ -69,7 +69,7 @@
 
                             <div class="hot_list__info">
                                 <h3 class="hot_list__title">
-                                    <a href="detail.php?slug=<?= $row['slug'] ?>"><?= $row['name'] ?></a>
+                                    <a href="<?php echo BASE_URL ?>pages/detail_product.php?product_id=<?php echo $row['id']; ?>"><?= $row['name'] ?></a>
                                 </h3>
                                 <div class="hot_list__price-box">
                                     <?php if ($old_price > 0): ?>
@@ -139,7 +139,7 @@
                             ?>
                                 <article class="hot_list__item">
                                     <div class="hot_list__media">
-                                        <a href="detail.php?slug=<?php echo $row['slug']; ?>">
+                                        <a href="<?php echo BASE_URL ?>pages/detail_product.php?product_id=<?php echo $row['id']; ?>">
                                             <img src="<?php echo $row['image']; ?>" alt="<?php echo $row['name']; ?>" class="hot_list__img">
                                         </a>
                                         <?php if ($discount > 0): ?>
@@ -149,7 +149,7 @@
 
                                     <div class="hot_list__info">
                                         <h3 class="hot_list__title">
-                                            <a href="detail.php?slug=<?php echo $row['slug']; ?>"><?php echo $row['name']; ?></a>
+                                            <a href="<?php echo BASE_URL ?>pages/detail_product.php?product_id=<?php echo $row['id']; ?>"><?php echo $row['name']; ?></a>
                                         </h3>
 
                                         <div class="hot_list__price-box">

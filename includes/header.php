@@ -3,7 +3,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-require_once 'config/db.php';
+require_once 'C:/xampp/htdocs/StudentGear/config/db.php';
 
 // 1. Truy vấn lấy 8 danh mục đang hoạt động từ Database
 $sql_categories = "SELECT name, slug FROM categories WHERE is_active = 1 LIMIT 8";
@@ -30,8 +30,8 @@ $res_categories = $conn->query($sql_categories);
                         Student<span style="color: #d0021c;">Gear</span>
                     </a>
 
-                    <form action="<?php echo BASE_URL; ?>search.php" class="header_search" method="GET">
-                        <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm..." required />
+                    <form action="<?php echo BASE_URL; ?>pages/category.php" class="header_search" method="GET">
+                        <input type="text" name="search" placeholder="Tìm kiếm sản phẩm..." required />
                         <button class="header_search-btn">
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </button>
