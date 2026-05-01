@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once 'C:/xampp/htdocs/StudentGear/config/db.php';
 
 // 1. Truy vấn lấy 8 danh mục đang hoạt động từ Database
-$sql_categories = "SELECT name, slug FROM categories WHERE is_active = 1 LIMIT 8";
+$sql_categories = "SELECT * FROM categories WHERE is_active = 1 LIMIT 8";
 $res_categories = $conn->query($sql_categories);
 
 // 2. Tính tổng số lượng sản phẩm trong giỏ hàng của người dùng hiện tại
@@ -101,7 +101,7 @@ if (isset($_SESSION['user_id'])) {
                     <?php
                     if ($res_categories && $res_categories->num_rows > 0) {
                         while ($cat = $res_categories->fetch_assoc()) {
-                            echo '<li class="header_list-item"><a href="' . BASE_URL . 'category.php?slug=' . $cat['slug'] . '" class="header_list-item--link">' . $cat['name'] . '</a></li>';
+                            echo '<li class="header_list-item"><a href="' . BASE_URL . 'pages/category.php?id=' . $cat['id'] . '" class="header_list-item--link">' . $cat['name'] . '</a></li>';
                         }
                     }
                     ?>
