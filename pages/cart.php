@@ -5,7 +5,7 @@ include_once "../includes/header.php";
 
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: " . BASE_URL . "login.php");
+    header("Location: " . BASE_URL . "auth/login.php");
     exit;
 }
 
@@ -121,7 +121,7 @@ while ($row = $result->fetch_assoc()) {
                         <span id="total"><?= number_format($total, 0, ',', '.') ?>₫</span>
                     </div>
 
-                    <a href="<?= BASE_URL ?>handlers/buy_now.php?from_cart=1"
+                    <a href="<?= BASE_URL ?>handler/buy_now.php?from_cart=1"
                         class="btn btn-checkout">
                         TIẾN HÀNH THANH TOÁN
                     </a>
@@ -139,5 +139,9 @@ while ($row = $result->fetch_assoc()) {
         <?php endif; ?>
     </div>
 </section>
+
+<?php
+include_once  "../includes/footer.php";
+?>
 
 <script src="<?= BASE_URL ?>assets/js/cart.js"></script>

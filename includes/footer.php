@@ -1,7 +1,7 @@
 <footer class="footer">
     <div class="footer__row container">
         <div class="footer__left">
-            <h3 class="footer__title">PHỤ KIỆN NGON BỔ RẺ</h3>
+            <h3 class="footer__title">STUDENTGEAR - Phụ Kiện Sinh Viên</h3>
             <ul class="footer__list">
                 <li>Hà Nội: PCC1 Triều Khúc, Thanh Xuân Nam, Thanh Xuân, Hà Nội</li>
                 <li>Sài Gòn: TTTM Sense City Lã Xuân Oai, quận 9, TP HCM</li>

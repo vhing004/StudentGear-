@@ -1,23 +1,36 @@
+<?php
+$sql = "SELECT title, image FROM banners";
+$result = $conn->query($sql);
+?>
+
+<head>
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
+</head>
+
 <main class="main">
     <div class="container">
         <!-- BANNER -->
         <section class="banner">
             <div class="banner__container">
                 <div class="banner__slider">
-                    <div class="banner__wrapper" id="bannerWrapper">
-                        <img src="https://phukienngonbore.com/wp-content/uploads/2021/12/banner-3.png" alt="Sub 1" class="banner__side-img">
-                    </div>
-
-                    <button class="banner__btn banner__btn--prev" onclick="changeSlide(-1)">&#10094;</button>
-                    <button class="banner__btn banner__btn--next" onclick="changeSlide(1)">&#10095;</button>
+                    <?php
+                    while ($row = $result->fetch_assoc()):
+                    ?>
+                        <div class="item" data-title="<?php echo $row['title']; ?>">
+                            <img src="<?php echo $row['image']; ?>" alt="banner">
+                        </div>
+                    <?php endwhile; ?>
                 </div>
 
                 <div class="banner__sidebar">
                     <div class="banner__side-item">
-                        <img src="https://phukienngonbore.com/wp-content/uploads/2021/12/banner-3.png" alt="Sub 1" class="banner__side-img">
+                        <img src="<?php echo BASE_URL; ?>assets/images/banner1.jpg" alt="Sub 1" class="banner__side-img">
                     </div>
                     <div class="banner__side-item">
-                        <img src="https://phukienngonbore.com/wp-content/uploads/2021/12/banner-3.png" alt="Sub 2" class="banner__side-img">
+                        <img src="<?php echo BASE_URL; ?>assets/images/banner2.jpg" alt="Sub 2" class="banner__side-img">
                     </div>
                 </div>
             </div>
@@ -35,7 +48,7 @@
         $sql = "SELECT * FROM products 
         WHERE is_active = 1 
         ORDER BY is_featured DESC, views DESC 
-        LIMIT 5";
+        LIMIT 10";
 
         $result = $conn->query($sql);
         ?>
@@ -43,7 +56,7 @@
         <section class="hot">
             <div class="hot_head">
                 <h4 class="hot_title">Sản phẩm bán chạy</h4>
-                <a href="tat-ca-san-pham.php" class="hot_all">Xem tất cả</a>
+                <a href="<?php BASE_URL ?>pages/category.php" class="hot_all">Xem tất cả</a>
             </div>
             <div class="hot_list">
                 <?php
@@ -116,7 +129,7 @@
                 $sql_products = "SELECT * FROM products 
                          WHERE category_id = $cat_id AND is_active = 1 
                          ORDER BY is_featured DESC, created_at DESC 
-                         LIMIT 10";
+                         LIMIT 5";
                 $res_products = $conn->query($sql_products);
 
                 // Chỉ hiển thị danh mục nếu có ít nhất 1 sản phẩm
@@ -126,7 +139,7 @@
                     <section class="hot">
                         <div class="hot_head">
                             <h4 class="hot_title"><?php echo htmlspecialchars($cat_name); ?></h4>
-                            <a href="category.php?slug=<?php echo $cat_slug; ?>" class="hot_all">Xem tất cả</a>
+                            <a href="<?php BASE_URL ?>pages/category.php?id=<?= $cat_id ?>" class="hot_all">Xem tất cả</a>
                         </div>
 
                         <div class="hot_list">
@@ -183,4 +196,14 @@
     </div>
 </main>
 
+<script
+    type="text/javascript"
+    src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script
+    type="text/javascript"
+    src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+<script
+    type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+<script src="./js/app.js"></script>
 <script src="<?php echo BASE_URL; ?>assets/js/index.js"></script>

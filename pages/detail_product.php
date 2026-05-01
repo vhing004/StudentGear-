@@ -101,21 +101,23 @@ if ($discount_percent > 0) {
 
                 <!-- Giá bán -->
                 <div class="product-detail__price-box">
+                    <p>
+                        Giá khuyến mãi: <span class="product-detail__price-current"><?= number_format($current_price, 0, ',', '.') ?>₫</span>
+                    </p>
                     <?php if ($old_price > 0): ?>
-                        <span class="product-detail__price-old">
-                            <?= number_format($old_price, 0, ',', '.') ?>₫
-                        </span>
+                        <p>
+                            Giá thị trường: <span class="product-detail__price-old"><?= number_format($old_price, 0, ',', '.') ?>₫</span>
+                        </p>
                     <?php endif; ?>
 
-                    <span class="product-detail__price-current">
-                        <?= number_format($current_price, 0, ',', '.') ?>₫
-                    </span>
 
                     <?php if ($old_price > 0): ?>
-                        <span class="product-detail__discount-info">
-                            Tiết kiệm <?= number_format($old_price - $current_price, 0, ',', '.') ?>₫
-                            (<?= number_format($discount_percent, 0) ?>%)
-                        </span>
+                        <p>
+                            Tiết kiệm: <span class="product-detail__discount-info">
+                                <?= number_format($old_price - $current_price, 0, ',', '.') ?>₫
+                                (<?= number_format($discount_percent, 0) ?>%)
+                            </span>
+                        </p>
                     <?php endif; ?>
                 </div>
 
@@ -156,14 +158,15 @@ if ($discount_percent > 0) {
 
                         <button type="submit"
                             name="add_to_cart"
+                            onclick="addToCart()"
                             class="product-detail__btn product-detail__btn--add">
-                            <i class="fa-solid fa-cart-plus"></i> THÊM VÀO GIỎ
+                            <i class="fa-solid fa-cart-plus"></i> THÊM VÀO GIỎ HÀNG
                         </button>
                     </form>
                 </div>
 
                 <!-- Nút MUA HÀNG NGAY -->
-                <form action="<?= BASE_URL ?>handlers/buy_now.php" method="POST" style="margin-top: 12px;">
+                <form action="<?= BASE_URL ?>handler/buy_now.php" method="POST" style="margin-top: 12px;">
                     <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
                     <input type="hidden" name="quantity" id="buy_quantity" value="1">
 
@@ -236,9 +239,9 @@ if ($res_categories->num_rows > 0):
 
     // 2. Với mỗi danh mục, lấy ra 5 sản phẩm mới nhất hoặc nổi bật
     $sql_products = "SELECT * FROM products 
-                         WHERE category_id = $cat_id AND is_active = 1 
-                         ORDER BY is_featured DESC, created_at DESC 
-                         LIMIT 10";
+        WHERE category_id = $cat_id AND is_active = 1 
+        ORDER BY is_featured DESC, created_at DESC 
+        LIMIT 10";
     $res_products = $conn->query($sql_products);
 
     // Chỉ hiển thị danh mục nếu có ít nhất 1 sản phẩm
@@ -248,7 +251,7 @@ if ($res_categories->num_rows > 0):
         <section class="hot container">
             <div class="hot_head">
                 <h4 class="hot_title">Sản phẩm tương tự</h4>
-                <a href="category.php?slug=<?php echo $cat_slug; ?>" class="hot_all">Xem tất cả</a>
+                <a href="<?php BASE_URL ?>category.php?id=<?= $cat_id ?>" class="hot_all">Xem tất cả</a>
             </div>
 
             <div class="hot_list">
@@ -331,6 +334,19 @@ endif;
         this.value = val;
         document.getElementById('buy_quantity').value = val;
     });
+
+    // Hàm xử lý khi bấm nút THÊM VÀO GIỎ
+    function addToCart() {
+        const quantity = document.getElementById('quantity').value;
+        const productId = <?= $product['id'] ?>;
+
+        // Hiển thị alert ngay lập tức
+        alert("Đã thêm " + quantity + " sản phẩm vào giỏ hàng!");
+
+        // Submit form để thực sự thêm vào database
+        const form = document.getElementById('addToCartForm');
+        form.submit();
+    }
 </script>
 <?php
 include_once "../includes/footer.php";

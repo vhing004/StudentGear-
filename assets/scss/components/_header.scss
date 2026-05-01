@@ -151,21 +151,17 @@
   &-info {
     display: flex;
     align-items: center;
-  }
-
-  &-img {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    object-fit: cover;
+    color: $color_w;
+    gap: 10px;
+    & i {
+      font-size: 20px;
+    }
   }
 
   &-name {
-    margin-left: 6px;
     font-size: 14px;
     font-weight: 400;
-    color: $main-color;
+    text-transform: capitalize;
   }
 
   // Dropdown Menu

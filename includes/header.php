@@ -8,6 +8,17 @@ require_once 'C:/xampp/htdocs/StudentGear/config/db.php';
 // 1. Truy vấn lấy 8 danh mục đang hoạt động từ Database
 $sql_categories = "SELECT name, slug FROM categories WHERE is_active = 1 LIMIT 8";
 $res_categories = $conn->query($sql_categories);
+
+// 2. Tính tổng số lượng sản phẩm trong giỏ hàng của người dùng hiện tại
+$cart = 0;
+if (isset($_SESSION['user_id'])) {
+    $u_id = (int)$_SESSION['user_id'];
+    $sql_cart = "SELECT SUM(quantity) AS total_quantity FROM cart WHERE user_id = $u_id";
+    $result_cart = $conn->query($sql_cart);
+    if ($result_cart && $row_cart = $result_cart->fetch_assoc()) {
+        $cart = $row_cart['total_quantity'] ?? 0;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -17,6 +28,7 @@ $res_categories = $conn->query($sql_categories);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="shortcut icon" href="<?php echo BASE_URL; ?>assets/images/logo.jpg" type="image/x-icon">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/main.css">
     <title>StudentGear - Phụ kiện sinh viên</title>
 </head>
@@ -41,42 +53,45 @@ $res_categories = $conn->query($sql_categories);
                         <a href="<?php echo BASE_URL; ?>pages/cart.php" class="header_menu-btn header_cart">
                             <div class="header_cart-wrap">
                                 <i class="fa-solid fa-shopping-cart"></i>
-                                <span class="header_cart-notice">0</span>
+                                <span class="header_cart-notice">
+                                    <?php
+                                    echo $cart;
+                                    ?>
+                                </span>
                             </div>
                             <span class="header_menu-text">Giỏ hàng</span>
-                        </a>
 
-                        <?php if (isset($_SESSION['user_id'])): ?>
-                            <div class="header_user">
-                                <div class="header_user-info">
-                                    <img src="<?php echo !empty($_SESSION['avatar']) ? BASE_URL . $_SESSION['avatar'] : BASE_URL . 'assets/img/default-avatar.png'; ?>" alt="User Avatar" class="header_user-img">
-                                    <span class="header_user-name"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                            <?php if (isset($_SESSION['user_id'])): ?>
+                                <div class="header_user">
+                                    <div class="header_user-info">
+                                        <i class="fa-solid fa-circle-user"></i>
+                                        <span class="header_user-name"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                                    </div>
+
+                                    <ul class="header_user-menu">
+                                        <li class="header_user-item">
+                                            <a href="<?php echo BASE_URL; ?>profile.php">
+                                                <i class="fa-regular fa-user"></i> Tài khoản của tôi
+                                            </a>
+                                        </li>
+                                        <li class="header_user-item">
+                                            <a href="<?php echo BASE_URL; ?>order_history.php">
+                                                <i class="fa-solid fa-clipboard-list"></i> Đơn mua
+                                            </a>
+                                        </li>
+                                        <li class="header_user-item header_user-item--separate">
+                                            <a href="<?php echo BASE_URL; ?>auth/logout.php">
+                                                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </div>
-
-                                <ul class="header_user-menu">
-                                    <li class="header_user-item">
-                                        <a href="<?php echo BASE_URL; ?>profile.php">
-                                            <i class="fa-regular fa-user"></i> Tài khoản của tôi
-                                        </a>
-                                    </li>
-                                    <li class="header_user-item">
-                                        <a href="<?php echo BASE_URL; ?>order_history.php">
-                                            <i class="fa-solid fa-clipboard-list"></i> Đơn mua
-                                        </a>
-                                    </li>
-                                    <li class="header_user-item header_user-item--separate">
-                                        <a href="<?php echo BASE_URL; ?>auth/logout.php">
-                                            <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        <?php else: ?>
-                            <a href="<?php echo BASE_URL; ?>auth/login.php" class="header_menu-btn" id="openLogin">
-                                <i class="fa-regular fa-circle-user"></i>
-                                <span class="header_menu-text">Đăng nhập</span>
-                            </a>
-                        <?php endif; ?>
+                            <?php else: ?>
+                                <a href="<?php echo BASE_URL; ?>auth/login.php" class="header_menu-btn" id="openLogin">
+                                    <i class="fa-regular fa-circle-user"></i>
+                                    <span class="header_menu-text">Đăng nhập</span>
+                                </a>
+                            <?php endif; ?>
                     </div>
                 </div>
             </nav>

@@ -1,94 +1,98 @@
+// BANNER
 .banner {
   &__container {
     display: grid;
     grid-template-columns: 2fr 1fr; // Tỷ lệ banner chính và banner phụ
-    gap: 10px;
+    gap: 20px;
   }
 
   &__slider {
     position: relative;
     overflow: hidden;
-    border-radius: 4px;
-  }
-
-  &__wrapper {
-    display: flex;
-    transition: transform 0.5s ease-in-out;
-
-    img {
+    max-width: 800px;
+    width: 100%;
+    & img {
+      height: 300px;
       width: 100%;
-      flex-shrink: 0;
-      display: block;
-    }
-  }
-
-  &__btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.3);
-    color: white;
-    border: none;
-    padding: 15px 10px;
-    cursor: pointer;
-    z-index: 10;
-    &:hover {
-      background: rgba(0, 0, 0, 0.6);
-    }
-    &--prev {
-      left: 0;
-      border-radius: 0 4px 4px 0;
-    }
-    &--next {
-      right: 0;
-      border-radius: 4px 0 0 4px;
     }
   }
 
   &__sidebar {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-  }
-
-  &__side-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 4px;
-  }
-
-  &__tabs {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr); // 5 Tab theo ảnh mẫu
-    border: 1px solid #eee;
-    margin-top: 10px;
-  }
-
-  &__tab-item {
-    padding: 12px 5px;
-    text-align: center;
-    font-size: 13px;
-    background: #fff;
-    cursor: pointer;
-    border-right: 1px solid #eee;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-
-    &:last-child {
-      border-right: none;
-    }
-
-    &--active {
-      background: #d0021c; // Màu đỏ giống mẫu
-      color: #fff;
-      font-weight: bold;
-    }
+    gap: 20px;
   }
 }
 
+// ARROW
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  border: none;
+  padding: 15px 10px;
+  cursor: pointer;
+  z-index: 20;
+}
+.arrow:hover {
+  background: $hover;
+  color: #fff;
+}
+.pull-left {
+  left: 0;
+  border-radius: 0 4px 4px 0;
+}
+.pull-right {
+  right: 0;
+  border-radius: 4px 0 0 4px;
+}
+
+/* Reset lại container dots */
+.slick-dots {
+  position: static; /* Đưa xuống dưới ảnh thay vì đè lên */
+  display: flex !important;
+  width: 100%;
+  border: 1px solid $border;
+}
+
+.slick-dots li {
+  flex: 1; /* Chia đều chiều ngang cho tất cả các ô */
+  height: 60px;
+  display: grid;
+  place-items: center;
+  border-right: 1px solid #eee; /* Viền ngăn cách giữa các ô */
+  font-size: 13px;
+  padding: 0 20px;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Style cho văn bản bên trong */
+.slick-dots li button {
+  background: #fff; /* Nền trắng mặc định */
+  color: #333;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+  border: none;
+  outline: none;
+  display: block;
+}
+
+/* Khi ô đó đang hiển thị (Active) */
+.slick-dots .slick-active {
+  background: $hover; /* Màu đỏ giống hình bạn gửi */
+  color: #fff;
+}
+
+/* Ẩn cái dấu chấm mặc định nếu nó còn xuất hiện */
+.slick-dots li button:before {
+  display: none;
+}
+
+// PRODUCT
 .hot {
   margin-top: 20px;
   &_head {
@@ -96,7 +100,7 @@
     align-items: center;
     justify-content: space-between;
     height: 45px;
-    background-color: $bg_color;
+    background-color: #c8dbf3;
     border-radius: 4px;
     margin-bottom: 20px;
   }
@@ -113,8 +117,8 @@
   }
   &_all {
     padding: 5px 14px;
-    border: 1px solid $main-color;
-    color: $main-color;
+    border: 1px solid $hover;
+    color: $hover;
     font-size: 13px;
     margin-right: 20px;
     border-radius: 4px;
@@ -161,7 +165,7 @@
       position: absolute;
       top: 0;
       left: 0;
-      background: #d0021c;
+      background: $hover;
       color: #fff;
       font-size: 11px;
       font-weight: bold;
@@ -189,7 +193,7 @@
 
     &__price-current {
       font-size: 15px;
-      color: #d0021c;
+      color: $hover;
       font-weight: bold;
     }
 
