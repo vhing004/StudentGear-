@@ -123,6 +123,10 @@
         font-weight: 500;
         text-transform: uppercase;
         font-weight: bold;
+        transition: color 0.15s ease;
+        &:hover {
+          color: $hover;
+        }
       }
     }
   }

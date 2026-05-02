@@ -1,0 +1,127 @@
+.order-history-page {
+  background-color: #f5f5f5;
+  margin-top: 120px;
+
+  .order-tabs {
+    display: flex;
+    background: #fff;
+    margin-bottom: 15px;
+    border-radius: 2px;
+    overflow-x: auto;
+
+    a {
+      flex: 1;
+      text-align: center;
+      padding: 15px 0;
+      text-decoration: none;
+      color: #333;
+      font-size: 1.4rem;
+      border-bottom: 2px solid transparent;
+
+      &.active {
+        color: #d0021c;
+        border-bottom-color: #d0021c;
+      }
+
+      &:hover {
+        color: #d0021c;
+      }
+    }
+  }
+
+  .order-card {
+    background: #fff;
+    margin-bottom: 12px;
+    padding: 20px;
+    border-radius: 3px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f2f2f2;
+
+      .shop-name {
+        font-weight: bold;
+        font-size: 1.4rem;
+      }
+      .order-status {
+        color: #26aa99;
+        font-size: 1.3rem;
+        .status-text {
+          color: $hover;
+          font-weight: 500;
+          margin-left: 5px;
+        }
+      }
+    }
+
+    .product-info {
+      display: flex;
+      padding: 15px 0;
+      border-bottom: 1px solid #f2f2f2;
+
+      img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border: 1px solid #e1e1e1;
+      }
+      .details {
+        flex: 1;
+        margin-left: 12px;
+        .name {
+          font-size: 1.5rem;
+          margin-bottom: 5px;
+          color: #333;
+        }
+        .qty {
+          color: #888;
+        }
+      }
+      .price {
+        color: $hover;
+        font-size: 1.4rem;
+      }
+    }
+
+    .order-footer {
+      text-align: right;
+      padding-top: 15px;
+
+      .total-section {
+        font-size: 1.4rem;
+        margin-bottom: 15px;
+        .total-amount {
+          font-size: 2.2rem;
+          color: $hover;
+          margin-left: 10px;
+        }
+      }
+
+      .actions {
+        .btn {
+          padding: 10px 25px;
+          border-radius: 2px;
+          cursor: pointer;
+          font-size: 1.4rem;
+          border: 1px solid #ddd;
+          margin-left: 10px;
+          text-decoration: none;
+          display: inline-block;
+
+          &-primary {
+            background: $hover;
+            color: #fff;
+            border-color: $hover;
+          }
+          &-outline {
+            background: #fff;
+            color: #555;
+          }
+        }
+      }
+    }
+  }
+}

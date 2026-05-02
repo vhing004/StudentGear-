@@ -166,7 +166,7 @@ if ($discount_percent > 0) {
                 </div>
 
                 <!-- Nút MUA HÀNG NGAY -->
-                <form action="<?= BASE_URL ?>handler/buy_now.php" method="POST" style="margin-top: 12px;">
+                <form action="<?= BASE_URL ?>handler/buy_now.php?product_id=<?= $product['id'] ?>" method="POST" style="margin-top: 12px;">
                     <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
                     <input type="hidden" name="quantity" id="buy_quantity" value="1">
 
