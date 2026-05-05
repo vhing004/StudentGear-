@@ -56,7 +56,7 @@ $result = $conn->query($sql);
         <section class="hot">
             <div class="hot_head">
                 <h4 class="hot_title">Sản phẩm bán chạy</h4>
-                <a href="<?php BASE_URL ?>pages/category.php" class="hot_all">Xem tất cả</a>
+                <a href="<?php BASE_URL ?>pages/category.php" class="hot_all">Xem tất cả <i class='fa-solid fa-chevron-right'></i></a>
             </div>
             <div class="hot_list">
                 <?php

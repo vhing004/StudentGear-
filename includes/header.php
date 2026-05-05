@@ -65,7 +65,7 @@ if (isset($_SESSION['user_id'])) {
                                 <div class="header_user">
                                     <div class="header_user-info">
                                         <i class="fa-solid fa-circle-user"></i>
-                                        <span class="header_user-name"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                                        <span class="header_user-name"><?php echo htmlspecialchars($_SESSION['fullname']); ?></span>
                                     </div>
 
                                     <ul class="header_user-menu">

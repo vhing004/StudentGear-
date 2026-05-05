@@ -5,6 +5,7 @@ $(document).ready(function () {
     slideToScroll: 1,
     autoplaySpeed: 2000,
     arrows: true,
+    draggable: true,
     prevArrow:
       "<button type='button' class='slick-prev pull-left arrow'><i class='fa-solid fa-chevron-left' aria-hidden='true'></i></button>",
     nextArrow:

@@ -14,6 +14,10 @@
     & img {
       height: 300px;
       width: 100%;
+      cursor: grabbing;
+    }
+    & .dot-link {
+      cursor: grabbing;
     }
   }
 
@@ -27,7 +31,7 @@
 // ARROW
 .arrow {
   position: absolute;
-  top: 50%;
+  top: 45%;
   transform: translateY(-50%);
   background: rgba(0, 0, 0, 0.3);
   color: white;
@@ -106,7 +110,7 @@
   }
   &_title {
     line-height: 45px;
-    padding-inline: 8px;
+    padding-inline: 15px;
     font-size: 18px;
     font-weight: 500;
     color: $bg_color;
@@ -114,7 +118,21 @@
     text-transform: uppercase;
     font-weight: 700;
     border-radius: 4px;
+    position: relative;
+    z-index: 1;
+    &::after {
+      position: absolute;
+      content: "";
+      top: 7px;
+      right: -15px;
+      width: 30px;
+      height: 30px;
+      background-color: $main-color;
+      transform: rotate(45deg);
+      z-index: -1;
+    }
   }
+
   &_all {
     padding: 5px 14px;
     border: 1px solid $hover;
@@ -122,6 +140,12 @@
     font-size: 13px;
     margin-right: 20px;
     border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    & i {
+      font-size: 10px;
+    }
   }
   &_list {
     display: grid;

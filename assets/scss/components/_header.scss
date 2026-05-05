@@ -78,12 +78,12 @@
     align-items: center;
     gap: 30px;
     &-btn {
-      font-size: 15px;
+      font-size: 16px;
       line-height: 14px;
       text-decoration: none;
       color: $color_w;
       font-weight: 500;
-      text-transform: uppercase;
+      text-transform: capitalize;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -163,7 +163,7 @@
   }
 
   &-name {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 400;
     text-transform: capitalize;
   }
@@ -221,6 +221,9 @@
       &:hover {
         background-color: #f8f8f8;
         color: #d0021c;
+      }
+      & i {
+        margin-right: 8px;
       }
     }
   }
