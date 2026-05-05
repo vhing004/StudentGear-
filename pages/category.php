@@ -28,6 +28,8 @@ if ($cat_id > 0) {
 $sql_products = "SELECT * FROM products WHERE is_active = 1";
 if ($cat_id > 0) {
     $sql_products .= " AND category_id = $cat_id";
+} elseif (isset($_GET['feature']) && $_GET['feature'] === 'true') {
+    $sql_products .= " AND is_featured = 1";
 }
 $sql_products .= " AND price BETWEEN $min_price AND $max_price";
 
