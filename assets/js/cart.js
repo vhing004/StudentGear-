@@ -1,27 +1,29 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Cập nhật tổng tiền
+  // 1. Cập nhật tổng tiền (Giữ nguyên logic của bạn nhưng tối ưu hiển thị)
   function updateTotal() {
     let total = 0;
     document.querySelectorAll(".subtotal").forEach((sub) => {
+      // Ưu tiên lấy giá trị từ dataset.raw để tránh lỗi định dạng tiền tệ
       total += parseFloat(
         sub.dataset.raw || sub.textContent.replace(/[^0-9]/g, ""),
       );
     });
-    document.getElementById("subtotal").textContent =
-      total.toLocaleString("vi-VN") + "₫";
-    document.getElementById("total").textContent =
-      total.toLocaleString("vi-VN") + "₫";
+
+    const formattedTotal = total.toLocaleString("vi-VN") + "₫";
+    document.getElementById("subtotal").textContent = formattedTotal;
+    document.getElementById("total").textContent = formattedTotal;
   }
 
-  // Xử lý nút tăng giảm
+  // 2. Xử lý nút tăng giảm
   document.querySelectorAll(".qty-btn").forEach((btn) => {
     btn.addEventListener("click", function () {
-      const cartId = this.dataset.id;
+      // Trong cart.php của bạn dùng data-cart-id, nên hãy dùng đúng tên đó
       const input = this.parentElement.querySelector(".qty-input");
       let qty = parseInt(input.value);
+      const max = parseInt(input.max) || 999;
 
       if (this.classList.contains("plus")) {
-        qty++;
+        if (qty < max) qty++; // Kiểm tra giới hạn tồn kho
       } else if (this.classList.contains("minus")) {
         qty = Math.max(1, qty - 1);
       }
@@ -31,11 +33,23 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Cập nhật tạm tính cho từng dòng
+  // 3. Đồng bộ khi người dùng tự nhập số vào ô input
+  document.querySelectorAll(".qty-input").forEach((input) => {
+    input.addEventListener("change", function () {
+      let qty = parseInt(this.value) || 1;
+      const max = parseInt(this.max);
+
+      if (qty < 1) qty = 1;
+      if (qty > max) qty = max;
+
+      this.value = qty;
+      updateSubtotal(this.closest("tr"), qty);
+    });
+  });
+
+  // 4. Cập nhật tạm tính cho từng dòng
   function updateSubtotal(row, qty) {
-    const price = parseFloat(
-      row.querySelector(".price").textContent.replace(/[^0-9]/g, ""),
-    );
+    const price = parseFloat(row.querySelector(".price").dataset.price); // Lấy từ dataset để chính xác hơn[cite: 2]
     const subtotalEl = row.querySelector(".subtotal");
     const newSubtotal = price * qty;
 
@@ -44,61 +58,41 @@ document.addEventListener("DOMContentLoaded", function () {
     updateTotal();
   }
 
-  // Xóa sản phẩm
-  // document.querySelectorAll(".remove-btn").forEach((btn) => {
-  //   btn.addEventListener("click", function () {
-  //     if (confirm("Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?")) {
-  //       const cartId = this.dataset.id;
-  //       const row = this.closest("tr");
+  // 5. Nút Cập nhật giỏ hàng: Gửi dữ liệu về Server[cite: 2]
+  const updateBtn = document.getElementById("update-cart-btn");
+  if (updateBtn) {
+    updateBtn.addEventListener("click", function (e) {
+      e.preventDefault(); // Chặn thẻ <a> nếu có[cite: 2]
 
-  //       fetch("<?= BASE_URL ?>handler/remove_from_cart.php", {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  //         body: `cart_id=${cartId}`,
-  //       })
-  //         .then((res) => res.json())
-  //         .then((data) => {
-  //           if (data.success) {
-  //             row.remove();
-  //             updateTotal();
-  //             if (document.querySelectorAll("tbody tr").length === 0) {
-  //               location.reload();
-  //             }
-  //           } else {
-  //             alert(data.message || "Có lỗi xảy ra");
-  //           }
-  //         });
-  //     }
-  //   });
-  // });
-  // Xóa sản phẩm - Dùng Form Submit (redirect)
-  // document.querySelectorAll(".remove-btn").forEach((btn) => {
-  //   btn.addEventListener("click", function () {
-  //     if (!confirm("Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?")) return;
+      const cartItems = [];
+      document.querySelectorAll(".qty-input").forEach((input) => {
+        cartItems.push({
+          cart_id: input.dataset.cartId, // Phải khớp với data-cart-id trong HTML[cite: 2]
+          quantity: input.value,
+        });
+      });
 
-  //     const cartId = this.dataset.cartId;
-
-  //     // Tạo form tạm để submit
-  //     const form = document.createElement("form");
-  //     form.method = "POST";
-  //     form.action = "<?= BASE_URL ?>handlers/remove_from_cart.php";
-
-  //     const input = document.createElement("input");
-  //     input.type = "hidden";
-  //     input.name = "cart_id";
-  //     input.value = cartId;
-
-  //     form.appendChild(input);
-  //     document.body.appendChild(form);
-  //     form.submit();
-  //   });
-  // });
-
-  // Nút Cập nhật giỏ hàng (có thể gửi tất cả thay đổi nếu cần)
-  document
-    .getElementById("update-cart-btn")
-    .addEventListener("click", function () {
-      alert("Giỏ hàng đã được cập nhật!");
-      // Sau này có thể gửi toàn bộ dữ liệu qua AJAX nếu muốn
+      // Gửi dữ liệu bằng AJAX (fetch)[cite: 2]
+      fetch("../handler/update_cart.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ cart_items: cartItems }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            alert("Giỏ hàng đã được cập nhật thành công!");
+            location.reload(); // Tải lại để đồng bộ hoàn toàn[cite: 2]
+          } else {
+            alert("Lỗi: " + (data.message || "Không thể cập nhật giỏ hàng"));
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("Đã xảy ra lỗi khi kết nối với máy chủ.");
+        });
     });
+  }
 });

@@ -24,6 +24,10 @@
 .category-sidebar {
   flex: 1;
   max-width: 260px;
+  & h3 {
+    padding: 5px 15px;
+    border-bottom: 1px solid #d8d8d8;
+  }
   .filter-group {
     margin-bottom: 30px;
     .filter-title {

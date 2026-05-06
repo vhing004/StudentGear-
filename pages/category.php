@@ -54,7 +54,7 @@ $res_products = $conn->query($sql_products);
         <div class="category_breadcrumb">
             <a href="<?php echo BASE_URL; ?>index.php">Trang chủ</a> »
             <a href="#">Sản phẩm</a> »
-            <span><?php echo $current_cat['name'] ?? 'Tất cả sản phẩm'; ?></span>
+            <span><?php echo $current_cat['name'] ?? 'Sản phẩm nổi bật'; ?></span>
         </div>
         <!-- Cụm hiển thị số lượng và Sắp xếp bên phải -->
         <div class="category-main_filter">
@@ -73,7 +73,7 @@ $res_products = $conn->query($sql_products);
 
         <!-- SIDEBAR: Bộ lọc bên trái (Giống image_4a4f9a.jpg) -->
         <aside class="category-sidebar" style="flex: 1; max-width: 250px;">
-            <h3 class="hot_title" style="font-size: 1.6rem; margin-bottom: 15px;">DANH MỤC SẢN PHẨM</h3>
+            <h3 style="font-size: 1.6rem; margin-bottom: 15px;">DANH MỤC SẢN PHẨM</h3>
             <ul style="list-style: none; padding: 0;">
                 <?php
                 $res_menu = $conn->query("SELECT id, name FROM categories WHERE is_active = 1");
@@ -87,7 +87,7 @@ $res_products = $conn->query($sql_products);
                 <?php endwhile; ?>
             </ul>
 
-            <h3 class="hot_title" style="font-size: 1.6rem; margin-top: 30px; margin-bottom: 15px;">LỌC THEO GIÁ</h3>
+            <h3 style="font-size: 1.6rem; margin-top: 30px; margin-bottom: 15px;">LỌC THEO GIÁ</h3>
             <form action="category.php" method="GET">
                 <input type="hidden" name="id" value="<?= $cat_id ?>">
                 <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -100,25 +100,19 @@ $res_products = $conn->query($sql_products);
 
         <!-- CONTENT: Hiển thị danh sách sản phẩm (Tái sử dụng class của bạn) -->
         <section class="category-main" style="flex: 3;">
-            <!-- Cụm hiển thị số lượng và Sắp xếp bên phải -->
-            <!-- <div class="category-main_filter">
-                <span style=" font-size: 1.4rem; color: #666;">
-                    Hiện đang có <strong><?php echo $res_products->num_rows; ?></strong> sản phẩm
-                </span>
-
-                <select onchange="location = this.value;" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
-                    <option value="category.php?id=<?= $cat_id ?>&sort=default" <?= $sort == 'default' ? 'selected' : '' ?>>Thứ tự mặc định</option>
-                    <option value="category.php?id=<?= $cat_id ?>&sort=price_asc" <?= $sort == 'price_asc' ? 'selected' : '' ?>>Giá thấp đến cao</option>
-                    <option value="category.php?id=<?= $cat_id ?>&sort=price_desc" <?= $sort == 'price_desc' ? 'selected' : '' ?>>Giá cao đến thấp</option>
-                </select>
-            </div> -->
-
             <div class="hot_list" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
                 <?php if ($res_products->num_rows > 0): ?>
                     <?php while ($row = $res_products->fetch_assoc()):
-                        $current_price = $row['price'];
-                        $discount = (int)$row['discount_percent'];
-                        $old_price = ($discount > 0) ? $current_price / (1 - ($discount / 100)) : 0;
+                        // 1. Giá gốc từ database (đóng vai trò là giá cũ/giá niêm yết)
+                        $old_price = (float)$row['price'];
+
+                        // 2. Phần trăm giảm giá
+                        $discount_percent = (float)$row['discount_percent'];
+
+                        // 3. Tính giá hiện tại sau khi áp dụng giảm giá (nếu có)
+                        $current_price = ($discount_percent > 0)
+                            ? $old_price * (1 - ($discount_percent / 100))
+                            : $old_price;
                     ?>
                         <!-- TÁI SỬ DỤNG HOÀN TOÀN ARTICLE CỦA BẠN[cite: 1] -->
                         <article class="hot_list__item" style="border: 1px solid #f1f1f1;">
@@ -126,8 +120,8 @@ $res_products = $conn->query($sql_products);
                                 <a href="detail_product.php?product_id=<?php echo $row['id']; ?>">
                                     <img src="<?php echo $row['image']; ?>" alt="<?php echo $row['name']; ?>" class="hot_list__img">
                                 </a>
-                                <?php if ($discount > 0): ?>
-                                    <span class="hot_list__badge">Giảm -<?php echo $discount; ?>%</span>
+                                <?php if ($discount_percent > 0): ?>
+                                    <span class="hot_list__badge">Giảm -<?php echo $discount_percent; ?>%</span>
                                 <?php endif; ?>
                             </div>
 

@@ -62,21 +62,24 @@ $result = $conn->query($sql);
                 <?php
                 if ($result->num_rows > 0):
                     while ($row = $result->fetch_assoc()):
-                        // Tính toán giá hiển thị
-                        $current_price = $row['price'];
-                        $discount = (int)$row['discount_percent'];
+                        // 1. Giá gốc từ database (đóng vai trò là giá cũ/giá niêm yết)
+                        $old_price = (float)$row['price'];
 
-                        // Giả định: Nếu có discount, tính giá cũ (gạch ngang)
-                        // Hoặc nếu bạn có cột giá cũ riêng thì thay vào đây
-                        $old_price = ($discount > 0) ? $current_price / (1 - ($discount / 100)) : 0;
+                        // 2. Phần trăm giảm giá
+                        $discount_percent = (float)$row['discount_percent'];
+
+                        // 3. Tính giá hiện tại sau khi áp dụng giảm giá (nếu có)
+                        $current_price = ($discount_percent > 0)
+                            ? $old_price * (1 - ($discount_percent / 100))
+                            : $old_price;
                 ?>
                         <article class="hot_list__item">
                             <div class="hot_list__media">
                                 <a href="<?php echo BASE_URL ?>pages/detail_product.php?product_id=<?php echo $row['id']; ?>">
                                     <img src="<?= $row['image'] ?>" alt="<?= $row['name'] ?>" class="hot_list__img">
                                 </a>
-                                <?php if ($discount > 0): ?>
-                                    <span class="hot_list__badge">Giảm -<?= $discount ?>%</span>
+                                <?php if ($discount_percent > 0): ?>
+                                    <span class="hot_list__badge">Giảm -<?= $discount_percent ?>%</span>
                                 <?php endif; ?>
                             </div>
 
@@ -85,7 +88,7 @@ $result = $conn->query($sql);
                                     <a href="<?php echo BASE_URL ?>pages/detail_product.php?product_id=<?php echo $row['id']; ?>"><?= $row['name'] ?></a>
                                 </h3>
                                 <div class="hot_list__price-box">
-                                    <?php if ($old_price > 0): ?>
+                                    <?php if ($current_price > 0): ?>
                                         <span class="hot_list__price-old"><?= number_format($old_price, 0, ',', '.') ?>₫</span>
                                     <?php endif; ?>
                                     <span class="hot_list__price-current"><?= number_format($current_price, 0, ',', '.') ?>₫</span>
@@ -145,18 +148,24 @@ $result = $conn->query($sql);
                         <div class="hot_list">
                             <?php
                             while ($row = $res_products->fetch_assoc()):
-                                $current_price = $row['price'];
-                                $discount = (int)$row['discount_percent'];
-                                // Tính giá cũ để hiển thị gạch ngang (nếu có giảm giá)
-                                $old_price = ($discount > 0) ? $current_price / (1 - ($discount / 100)) : 0;
+                                // 1. Giá gốc từ database (đóng vai trò là giá cũ/giá niêm yết)
+                                $old_price = (float)$row['price'];
+
+                                // 2. Phần trăm giảm giá
+                                $discount_percent = (float)$row['discount_percent'];
+
+                                // 3. Tính giá hiện tại sau khi áp dụng giảm giá (nếu có)
+                                $current_price = ($discount_percent > 0)
+                                    ? $old_price * (1 - ($discount_percent / 100))
+                                    : $old_price;
                             ?>
                                 <article class="hot_list__item">
                                     <div class="hot_list__media">
                                         <a href="<?php echo BASE_URL ?>pages/detail_product.php?product_id=<?php echo $row['id']; ?>">
                                             <img src="<?php echo $row['image']; ?>" alt="<?php echo $row['name']; ?>" class="hot_list__img">
                                         </a>
-                                        <?php if ($discount > 0): ?>
-                                            <span class="hot_list__badge">Giảm -<?php echo $discount; ?>%</span>
+                                        <?php if ($discount_percent > 0): ?>
+                                            <span class="hot_list__badge">Giảm -<?php echo $discount_percent; ?>%</span>
                                         <?php endif; ?>
                                     </div>
 
@@ -166,7 +175,7 @@ $result = $conn->query($sql);
                                         </h3>
 
                                         <div class="hot_list__price-box">
-                                            <?php if ($old_price > 0): ?>
+                                            <?php if ($current_price > 0): ?>
                                                 <span class="hot_list__price-old"><?php echo number_format($old_price, 0, ',', '.'); ?>₫</span>
                                             <?php endif; ?>
                                             <span class="hot_list__price-current"><?php echo number_format($current_price, 0, ',', '.'); ?>₫</span>

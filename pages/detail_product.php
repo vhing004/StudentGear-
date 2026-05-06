@@ -29,14 +29,15 @@ if (!$product) {
     exit;
 }
 
-// Tính giá cũ (giá thị trường)
-$current_price = (float)$product['price'];
+// 1. Giá niêm yết (Giá gốc từ database)
+$old_price = (float)$product['price'];
 $discount_percent = (float)$product['discount_percent'];
-$old_price = 0;
 
-if ($discount_percent > 0) {
-    $old_price = round($current_price / (1 - $discount_percent / 100));
-}
+// 2. Tính giá khuyến mãi (Giá hiện tại khách phải trả)
+// Công thức: Giá hiện tại = Giá gốc * (1 - % giảm giá / 100)
+$current_price = ($discount_percent > 0)
+    ? $old_price * (1 - ($discount_percent / 100))
+    : $old_price;
 ?>
 <!-- Chi tiết sản phẩm -->
 <section class="product-detail">
@@ -152,6 +153,7 @@ if ($discount_percent > 0) {
                                 min="1"
                                 max="<?= $product['stock'] ?>"
                                 class="quantity-input"
+                                oninput="document.getElementById('buy_quantity').value = this.value"
                                 required>
                             <button type="button" class="quantity-btn plus" onclick="changeQuantity(1)">+</button>
                         </div>
@@ -168,8 +170,16 @@ if ($discount_percent > 0) {
                 <!-- Nút MUA HÀNG NGAY -->
                 <form action="<?= BASE_URL ?>handler/buy_now.php?product_id=<?= $product['id'] ?>" method="POST" style="margin-top: 12px;">
                     <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
-                    <input type="hidden" name="quantity" id="buy_quantity" value="1">
-
+                    <input type="number"
+                        hidden
+                        id="buy_quantity"
+                        name="quantity"
+                        value="1"
+                        min="1"
+                        max="<?= $product['stock'] ?>"
+                        class="quantity-input"
+                        oninput="document.getElementById('buy_quantity').value = this.value"
+                        required>
                     <button type="submit"
                         name="buy_now"
                         class="product-detail__btn product-detail__btn--buy">
@@ -257,18 +267,24 @@ if ($res_categories->num_rows > 0):
             <div class="hot_list">
                 <?php
                 while ($row = $res_products->fetch_assoc()):
-                    $current_price = $row['price'];
-                    $discount = (int)$row['discount_percent'];
-                    // Tính giá cũ để hiển thị gạch ngang (nếu có giảm giá)
-                    $old_price = ($discount > 0) ? $current_price / (1 - ($discount / 100)) : 0;
+                    // 1. Giá gốc từ database (đóng vai trò là giá cũ/giá niêm yết)
+                    $old_price = (float)$row['price'];
+
+                    // 2. Phần trăm giảm giá
+                    $discount_percent = (float)$row['discount_percent'];
+
+                    // 3. Tính giá hiện tại sau khi áp dụng giảm giá (nếu có)
+                    $current_price = ($discount_percent > 0)
+                        ? $old_price * (1 - ($discount_percent / 100))
+                        : $old_price;
                 ?>
                     <article class="hot_list__item">
                         <div class="hot_list__media">
                             <a href="<?php echo BASE_URL ?>pages/detail_product.php?product_id=<?php echo $row['id']; ?>">
                                 <img src="<?php echo $row['image']; ?>" alt="<?php echo $row['name']; ?>" class="hot_list__img">
                             </a>
-                            <?php if ($discount > 0): ?>
-                                <span class="hot_list__badge">Giảm -<?php echo $discount; ?>%</span>
+                            <?php if ($discount_percent > 0): ?>
+                                <span class="hot_list__badge">Giảm -<?php echo $discount_percent; ?>%</span>
                             <?php endif; ?>
                         </div>
 
@@ -307,30 +323,30 @@ endif;
 ?>
 
 <script>
-    // Xử lý tăng giảm số lượng với giới hạn stock
     const maxStock = <?= $product['stock'] ?>;
 
     function changeQuantity(change) {
         let qtyInput = document.getElementById('quantity');
-        let currentQty = parseInt(qtyInput.value) || 1;
+        let buyQtyInput = document.getElementById('buy_quantity');
 
+        let currentQty = parseInt(qtyInput.value) || 1;
         let newQty = currentQty + change;
 
-        // Giới hạn số lượng
+        // Giới hạn số lượng trong khoảng từ 1 đến maxStock
         if (newQty < 1) newQty = 1;
         if (newQty > maxStock) newQty = maxStock;
 
+        // Cập nhật giá trị cho CẢ HAI ô input
         qtyInput.value = newQty;
-
-        // Cập nhật số lượng cho form "Mua ngay"
-        document.getElementById('buy_quantity').value = newQty;
+        buyQtyInput.value = newQty;
     }
 
-    // Đồng bộ số lượng khi người dùng tự nhập vào input
-    document.getElementById('quantity').addEventListener('input', function() {
+    // Đảm bảo khi người dùng tự nhập số, hệ thống vẫn kiểm tra stock và đồng bộ
+    document.getElementById('quantity').addEventListener('change', function() {
         let val = parseInt(this.value) || 1;
         if (val < 1) val = 1;
         if (val > maxStock) val = maxStock;
+
         this.value = val;
         document.getElementById('buy_quantity').value = val;
     });

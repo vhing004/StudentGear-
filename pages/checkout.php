@@ -81,19 +81,19 @@ if ($res_recent && $res_recent->num_rows > 0) {
                     </h3>
                     <div class="payment-methods">
                         <label class="payment-option">
-                            <input type="radio" name="payment_method" value="cod" checked>
                             <div class="option-content">
+                                <input type="radio" name="payment_method" value="cod" checked>
                                 <span class="option-name">Thanh toán khi nhận hàng (COD)</span>
-                                <span class="option-desc">Bạn sẽ thanh toán bằng tiền mặt cho nhân viên giao hàng.</span>
                             </div>
+                            <span class="option-desc">Bạn sẽ thanh toán bằng tiền mặt cho nhân viên giao hàng.</span>
                         </label>
 
                         <label class="payment-option">
-                            <input type="radio" name="payment_method" value="bank_transfer">
                             <div class="option-content">
+                                <input type="radio" name="payment_method" value="bank_transfer">
                                 <span class="option-name">Chuyển khoản ngân hàng</span>
-                                <span class="option-desc">Đơn hàng sẽ được xử lý sau khi chúng tôi nhận được tiền chuyển khoản.</span>
                             </div>
+                            <span class="option-desc">Đơn hàng sẽ được xử lý sau khi chúng tôi nhận được tiền chuyển khoản.</span>
                         </label>
                     </div>
                 </section>
@@ -140,7 +140,6 @@ if ($res_recent && $res_recent->num_rows > 0) {
                 <!-- Input ẩn để gửi thông tin tiền sang backend -->
                 <input type="hidden" name="total_price" value="<?= $total_temp + $shipping_fee ?>">
                 <input type="hidden" name="shipping_fee" value="<?= $shipping_fee ?>">
-
                 <button type="submit" name="btn_order" class="btn-submit-order">
                     <i class="fa-solid fa-check"></i> XÁC NHẬN ĐẶT HÀNG
                 </button>

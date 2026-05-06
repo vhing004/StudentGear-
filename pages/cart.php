@@ -13,8 +13,7 @@ $user_id = $_SESSION['user_id'];
 
 // Lấy dữ liệu giỏ hàng
 $sql = "SELECT c.id as cart_id, c.quantity, 
-               p.id as product_id, p.name, p.price, p.image, p.stock,
-               (p.price * c.quantity) AS subtotal
+               p.id as product_id, p.name, p.price, p.image, p.stock, p.discount_percent
         FROM cart c
         JOIN products p ON c.product_id = p.id
         WHERE c.user_id = ?
@@ -29,6 +28,15 @@ $cart_items = [];
 $total = 0;
 
 while ($row = $result->fetch_assoc()) {
+    // Tính giá khuyến mãi cho từng sản phẩm[cite: 1]
+    $old_price = (float)$row['price'];
+    $discount = (float)$row['discount_percent'];
+    $current_price = ($discount > 0) ? $old_price * (1 - ($discount / 100)) : $old_price;
+
+    // Lưu giá thực tế và tính tạm tính mới
+    $row['current_price'] = $current_price;
+    $row['subtotal'] = $current_price * $row['quantity'];
+
     $cart_items[] = $row;
     $total += $row['subtotal'];
 }
@@ -70,8 +78,13 @@ while ($row = $result->fetch_assoc()) {
                                                 <h4><?= htmlspecialchars($item['name']) ?></h4>
                                             </div>
                                         </td>
-                                        <td class="price" data-price="<?= $item['price'] ?>">
-                                            <?= number_format($item['price'], 0, ',', '.') ?>₫
+                                        <td class="price" data-price="<?= $item['current_price'] ?>">
+                                            <div class="cart-price-box">
+                                                <?php if ($item['discount_percent'] > 0): ?>
+                                                    <del class="price-old" style="color: #858585;"><?= number_format($item['price'], 0, ',', '.') ?>₫</del><br>
+                                                <?php endif; ?>
+                                                <span class="price-current"><?= number_format($item['current_price'], 0, ',', '.') ?>₫</span>
+                                            </div>
                                         </td>
                                         <td class="quantity">
                                             <div class="quantity-control">
@@ -103,8 +116,8 @@ while ($row = $result->fetch_assoc()) {
                         <a href="<?= BASE_URL ?>index.php" class="btn btn-outline">
                             ← TIẾP TỤC XEM SẢN PHẨM
                         </a>
-                        <button id="update-cart-btn" class="btn btn-secondary">
-                            <a href="<?php echo BASE_URL; ?>handler/update_cart.php?cart_id=<?= $item['cart_id'] ?>"> CẬP NHẬT GIỎ HÀNG</a>
+                        <button type="button" id="update-cart-btn" class="btn btn-secondary" onclick="submitCartUpdate()">
+                            CẬP NHẬT GIỎ HÀNG
                         </button>
                     </div>
                 </div>
