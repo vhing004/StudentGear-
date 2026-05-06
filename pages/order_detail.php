@@ -35,7 +35,7 @@ $res_history = $conn->query($sql_history);
 <main class="order-detail-page">
     <div class="container">
         <div class="detail-header">
-            <a href="order_history.php" class="back-link"><i class="fa-solid fa-chevron-left"></i> QUAY LẠI</a>
+            <a href="history_order.php" class="back-link"><i class="fa-solid fa-chevron-left"></i> QUAY LẠI</a>
             <div class="order-meta">
                 <span>MÃ ĐƠN HÀNG: <?= $order['order_code'] ?></span> |
                 <span class="status-highlight"><?= strtoupper($order['status']) ?></span>
