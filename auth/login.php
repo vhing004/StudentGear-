@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login_submit'])) {
                 $_SESSION['fullname'] = $user['fullname'];
                 $_SESSION['role'] = $user['role']; // Lưu role để phân biệt
 
-                header("Location: " . BASE_URL . "admin/dashboard.php"); // Chuyển hướng sang Admin
+                header("Location: " . BASE_URL . "admin/index.php"); // Chuyển hướng sang Admin
                 exit();
             } else {
                 $error = "Mật khẩu Admin không chính xác!";
