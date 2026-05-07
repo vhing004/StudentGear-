@@ -1,0 +1,151 @@
+// ==========================================================================
+// MODAL STYLES
+// ==========================================================================
+
+.modal {
+  display: none; // Mặc định ẩn
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); // Làm tối nền phía sau
+  backdrop-filter: blur(4px); // Hiệu ứng mờ nền (hiện đại)
+  overflow-y: auto;
+  animation: fadeIn 0.3s ease-out;
+
+  &__content {
+    background: $white;
+    width: 90%;
+    max-width: 550px;
+    margin: 50px auto;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    position: relative;
+    animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    h3 {
+      color: $sidebar-bg;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid $bg-light;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      &::before {
+        content: "\f044"; // Icon edit từ FontAwesome
+        font-family: "Font Awesome 6 Free";
+        color: $primary-color;
+      }
+    }
+  }
+
+  // Tùy chỉnh các nhóm nhập liệu trong Modal
+  .auth-form__group {
+    margin-bottom: 20px;
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #444;
+      font-size: 0.9rem;
+    }
+
+    .auth-form__input {
+      width: 100%;
+      border: 1px solid #ddd;
+      padding: 12px 15px;
+      border-radius: 8px;
+      transition: all 0.3s;
+
+      &:focus {
+        border-color: $primary-color;
+        box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+        outline: none;
+      }
+    }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid $bg-light;
+  }
+  & .btn-secondary {
+    background: #ccc;
+    color: #333;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+
+    &:hover {
+      background: #bbb;
+    }
+  }
+}
+select.auth-form__input {
+  appearance: none; // Xóa icon mặc định của trình duyệt
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+  cursor: pointer;
+}
+
+// Preview ảnh
+#edit_preview {
+  display: block;
+  border: 2px solid $bg-light;
+  padding: 5px;
+  background: #fff;
+  margin-bottom: 10px;
+  object-fit: cover;
+}
+// Thêm vào file dashboard.scss
+#addModal {
+  .modal__content h3::before {
+    content: "\f0fe"; // Icon plus-square từ FontAwesome
+    font-family: "Font Awesome 6 Free";
+    color: #28a745; // Màu xanh lá cho hành động thêm mới
+  }
+}
+
+#editModal {
+  .modal__content h3::before {
+    content: "\f044"; // Icon edit từ FontAwesome
+    font-family: "Font Awesome 6 Free";
+    color: $primary-color; // Màu đỏ cho hành động chỉnh sửa
+  }
+}
+
+// Animation
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

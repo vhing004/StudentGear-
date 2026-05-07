@@ -22,7 +22,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <i class="fas fa-users"></i> Khách hàng
         </a>
         <div class="sidebar__divider"></div>
-        <a href="../logout.php" class="text-danger">
+        <a href="<?php echo BASE_URL; ?>auth/logout.php" class="text-danger">
             <i class="fas fa-sign-out-alt"></i> Đăng xuất
         </a>
     </nav>
