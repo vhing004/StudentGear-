@@ -72,9 +72,9 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY is_active DESC, id
                                         onclick="openEditModal(<?= htmlspecialchars(json_encode($row)) ?>)">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <!-- <a href="../handlers/delete_category.php?id=<?= $row['id'] ?>"
+                                    <a href="../handlers/delete_category.php?id=<?= $row['id'] ?>"
                                         class="action-link text-danger"
-                                        onclick="return confirm('Xác nhận xóa danh mục này?')"><i class="fas fa-trash"></i></a> -->
+                                        onclick="return confirm('Xác nhận xóa danh mục này?')"><i class="fas fa-trash"></i></a>
                                 </td>
                             </tr>
                         <?php endwhile; ?>
@@ -84,21 +84,7 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY is_active DESC, id
         </main>
     </div>
 
-    <!-- ADD MODAL
-    <div id="addModal" class="modal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
-        <div style="background:#fff; width:500px; margin:10% auto; padding:20px; border-radius:8px;">
-            <h3>Thêm danh mục mới</h3><br>
-            <form action="handlers/add_category.php" method="POST" enctype="multipart/form-data">
-                <input type="text" name="name" placeholder="Tên danh mục" class="auth-form__input" required><br><br>
-                <input type="text" name="slug" placeholder="Slug (ví dụ: laptop-sinh-vien)" class="auth-form__input" required><br><br>
-                <textarea name="description" placeholder="Mô tả" class="auth-form__input" style="height:80px;"></textarea><br><br>
-                <label>Hình ảnh:</label>
-                <input type="file" name="image" required><br><br>
-                <button type="submit" class="btn-primary">Lưu danh mục</button>
-                <button type="button" onclick="document.getElementById('addModal').style.display='none'">Hủy</button>
-            </form>
-        </div>
-    </div> -->
+    <!-- ADD MODAL-->
     <div id="addModal" class="modal">
         <div class="modal__content">
             <h3>Thêm danh mục mới</h3>
