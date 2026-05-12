@@ -378,7 +378,7 @@ while ($cat = $categories->fetch_assoc()) {
             previewImg.src = product.image;
         } else {
             // Nếu là file local (nhớ lùi 1 cấp thư mục để ra khỏi admin)
-            previewImg.src = '../../' + product.image;
+            previewImg.src = product.image;
         }
 
         // 4. Hiển thị Modal bằng hàm chung đã viết trước đó
