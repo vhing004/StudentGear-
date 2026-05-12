@@ -24,7 +24,7 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY is_active DESC, id
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Quản trị - StudentGear</title>
+    <title>Quản lý danh mục - StudentGear</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/admin.css">
 </head>
@@ -45,7 +45,6 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY is_active DESC, id
                 <table class="table">
                     <thead>
                         <tr>
-                            <!-- <th>STT</th> -->
                             <th>Hình ảnh</th>
                             <th>Tên danh mục</th>
                             <th>Mô tả</th>
@@ -56,8 +55,29 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY is_active DESC, id
                     <tbody>
                         <?php while ($row = $categories->fetch_assoc()): ?>
                             <tr>
-                                <!-- <td><?= $row['id'] ?></td> -->
-                                <td><img src="<?= $row['image'] ?>" width="50" height="50" style="object-fit:cover; border-radius:5px;"></td>
+                                <td>
+                                    <div class="product-img-wrapper">
+                                        <?php
+                                        $img_src = $row['image'];
+                                        $final_src = "";
+
+                                        // TRƯỜNG HỢP 1: Nếu là link từ internet (bắt đầu bằng http)
+                                        if (strpos($img_src, 'http') === 0) {
+                                            $final_src = $img_src;
+                                        }
+                                        // TRƯỜNG HỢP 2: Nếu là file upload trong máy (có tồn tại file)
+                                        elseif (!empty($img_src) && file_exists("../../" . $img_src)) {
+                                            $final_src = "../../" . $img_src;
+                                        }
+                                        // TRƯỜNG HỢP 3: Ảnh trống hoặc file không tồn tại
+                                        else {
+                                            $final_src = "../../assets/images/no-image.png";
+                                        }
+                                        ?>
+                                        <img src="<?= $final_src ?>"
+                                            alt="<?= htmlspecialchars($row['name']) ?>">
+                                    </div>
+                                </td>
                                 <td><strong><?= $row['name'] ?></strong></td>
                                 <td><?= $row['description'] ?></td>
                                 <td>

@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id'])) {
         // Có upload ảnh mới -> Xử lý upload
         $file_name = time() . "_" . $_FILES["image"]["name"];
         move_uploaded_file($_FILES["image"]["tmp_name"], "../../assets/images/products/" . $file_name);
-        $image_path = "assets/images/products/" . $file_name;
+        $image_path = "../../assets/images/products/" . $file_name;
 
         // Cập nhật với ảnh mới
         $sql = "UPDATE products SET name=?, description=?, price=?, cost_price=?, stock=?, category_id=?, image=?, slug=?, is_featured=?, is_new=?, is_active=?, discount_percent=? WHERE id=?";

@@ -79,8 +79,8 @@ while ($cat = $categories->fetch_assoc()) {
                                             $final_src = $img_src;
                                         }
                                         // TRƯỜNG HỢP 2: Nếu là file upload trong máy (có tồn tại file)
-                                        elseif (!empty($img_src) && file_exists("../../" . $img_src)) {
-                                            $final_src = "../../" . $img_src;
+                                        elseif (!empty($img_src) && file_exists($img_src)) {
+                                            $final_src = $img_src;
                                         }
                                         // TRƯỜNG HỢP 3: Ảnh trống hoặc file không tồn tại
                                         else {
