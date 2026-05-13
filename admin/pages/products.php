@@ -3,7 +3,6 @@
 session_start();
 require_once '../../config/db.php';
 
-
 /**
  * 2. LOGIC BẢO MẬT: Chỉ Admin/Staff mới được vào
  * Kiểm tra user_id (đã đăng nhập) và role (là tài khoản admin)
@@ -18,7 +17,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
 $sql = "SELECT p.*, c.name as category_name 
         FROM products p 
         LEFT JOIN categories c ON p.category_id = c.id 
-        ORDER BY p.id DESC";
+        ORDER BY p.is_active DESC, p.id DESC";
 $products = $conn->query($sql);
 
 // 2. Lấy danh sách danh mục để đổ vào Select Box trong Modal
@@ -90,7 +89,6 @@ while ($cat = $categories->fetch_assoc()) {
 
                                         <img src="<?= $final_src ?>"
                                             alt="<?= htmlspecialchars($row['name']) ?>">
-                                        <!-- width="50" height="50" style="border-radius: 5px;" -->
                                     </div>
                                 </td>
                                 <td style="max-width: 200px;"><strong><?= htmlspecialchars($row['name']) ?></strong></td>

@@ -3,7 +3,6 @@
 session_start();
 require_once '../../config/db.php';
 
-
 /**
  * 2. LOGIC BẢO MẬT: Chỉ Admin/Staff mới được vào
  * Kiểm tra user_id (đã đăng nhập) và role (là tài khoản admin)
@@ -14,8 +13,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
     exit();
 }
 // Lấy danh sách danh mục
-// $categories = $conn->query("SELECT * FROM categories ORDER BY id ASC");
-$categories = $conn->query("SELECT * FROM categories ORDER BY is_active DESC, id ASC");
+$categories = $conn->query("SELECT * FROM categories ORDER BY is_active DESC, id DESC");
 ?>
 
 <!DOCTYPE html>
@@ -36,8 +34,8 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY is_active DESC, id
         <main class="main-content">
             <header class="main-content__header">
                 <h2>Quản lý danh mục</h2>
-                <button class="btn-primary" onclick="document.getElementById('addModal').style.display='block'">
-                    <i class="fas fa-plus"></i> Thêm danh mục mới
+                <button class="btn-primary" onclick="openModal('addProdModal')">
+                    <i class="fas fa-plus"></i> Thêm danh mục
                 </button>
             </header>
 
@@ -66,8 +64,8 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY is_active DESC, id
                                             $final_src = $img_src;
                                         }
                                         // TRƯỜNG HỢP 2: Nếu là file upload trong máy (có tồn tại file)
-                                        elseif (!empty($img_src) && file_exists("../../" . $img_src)) {
-                                            $final_src = "../../" . $img_src;
+                                        elseif (!empty($img_src) && file_exists($img_src)) {
+                                            $final_src = $img_src;
                                         }
                                         // TRƯỜNG HỢP 3: Ảnh trống hoặc file không tồn tại
                                         else {
@@ -88,8 +86,7 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY is_active DESC, id
                                 </td>
                                 <td>
                                     <button class="action-link"
-                                        style="border:none; background:none; cursor:pointer;"
-                                        onclick="openEditModal(<?= htmlspecialchars(json_encode($row)) ?>)">
+                                        onclick='openEditProdModal(<?= json_encode($row, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <a href="../handlers/delete_category.php?id=<?= $row['id'] ?>"
@@ -105,20 +102,15 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY is_active DESC, id
     </div>
 
     <!-- ADD MODAL-->
-    <div id="addModal" class="modal">
+    <div id="addProdModal" class="modal">
         <div class="modal__content">
             <h3>Thêm danh mục mới</h3>
 
-            <form action="<?php echo BASE_URL; ?>admin/handlers/add_category.php" method="POST" enctype="multipart/form-data">
+            <form action="../handlers/add_category.php" method="POST" enctype="multipart/form-data" class="grid-form">
 
                 <div class="auth-form__group">
                     <label>Tên danh mục</label>
                     <input type="text" name="name" class="auth-form__input" required placeholder="Ví dụ: Laptop Gaming">
-                </div>
-
-                <div class="auth-form__group">
-                    <label>Slug</label>
-                    <input type="text" name="slug" class="auth-form__input" required placeholder="laptop-gaming">
                 </div>
 
                 <div class="auth-form__group">
@@ -127,18 +119,19 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY is_active DESC, id
                 </div>
 
                 <div class="auth-form__group">
-                    <label>Hình ảnh đại diện</label>
-                    <input type="file" name="image" class="auth-form__input" required style="padding: 8px;">
-                    <small style="color: #888;">* Định dạng: JPG, PNG, WebP (Tỷ lệ 1:1 là tốt nhất)</small>
-                </div>
+                    <label>Hình ảnh sản phẩm</label>
+                    <input type="file" name="image" id="product_image_input" class="auth-form__input" accept="image/*" required>
 
+                    <div id="image_preview_box" style="margin-top: 15px; display: none; position: relative; width: 150px;">
+                        <img id="img_preview" src="#" alt="Preview" style="width: 100%; border-radius: 8px; border: 2px solid #ddd; object-fit: cover;">
+                        <button type="button" onclick="removePreview()" style="position: absolute; top: -10px; right: -10px; background: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
                 <div class="modal__footer">
-                    <button type="button" class="btn-secondary" onclick="document.getElementById('addModal').style.display='none'">
-                        Hủy
-                    </button>
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-plus"></i> Tạo danh mục
-                    </button>
+                    <button type="button" class="btn-secondary" onclick="closeModal('addProdModal')">Hủy</button>
+                    <button type="submit" class="btn-primary">Lưu sản phẩm</button>
                 </div>
             </form>
         </div>
@@ -146,46 +139,53 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY is_active DESC, id
 
 
     <!-- UPDATE MODAL -->
-    <div id="editModal" class="modal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
-        <div style="background:#fff; width:550px; margin:5% auto; padding:25px; border-radius:12px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
-            <h3 style="color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px;">Chỉnh sửa danh mục</h3><br>
+    <div id="editProdModal" class="modal">
+        <div class="modal__content" style="max-width: 800px;">
+            <h3 style="color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px;">Chỉnh sửa danh mục</h3>
 
-            <form action="<?php echo BASE_URL; ?>admin/handlers/edit_category.php" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="id" id="edit_id">
+            <form action="../handlers/edit_category.php" method="POST" enctype="multipart/form-data" class="grid-form">
+                <input type="hidden" name="id" id="edit_prod_id">
+
+                <div class="auth-form__group">
+                    <label>Tên danh mục:</label>
+                    <input type="text" name="name" id="edit_prod_name" class="auth-form__input" required>
+                </div>
+
+                <div class="auth-form__group">
+                    <label>Mô tả:</label>
+                    <textarea name="description" id="edit_prod_desc" class="auth-form__input" style="height:100px; padding:10px;"></textarea>
+                </div>
+
+                <div class="auth-form__group">
+                    <label>Hình ảnh sản phẩm</label>
+
+                    <div id="old_img_container" style="margin-bottom: 10px;">
+                        <p style="font-size: 12px; color: #888;">Ảnh hiện tại:</p>
+                        <div class="product-img-wrapper" style="width: 100px; height: 100px;">
+                            <img id="edit_prod_preview" src="" alt="Old Image">
+                        </div>
+                    </div>
+
+                    <div id="new_img_preview_container" style="display: none; margin-bottom: 10px;">
+                        <p style="font-size: 12px; color: #28a745; font-weight: bold;">Ảnh mới chọn:</p>
+                        <div class="product-img-wrapper" style="width: 100px; height: 100px; border: 2px solid #28a745;">
+                            <img id="edit_prod_new_preview" src="#" alt="New Preview">
+                        </div>
+                    </div>
+
+                    <input type="file" name="image" id="edit_prod_image_input" class="auth-form__input" accept="image/*">
+                </div>
 
                 <div class="auth-form__group">
                     <label>Trạng thái hoạt động</label>
-                    <select name="is_active" id="edit_is_active" class="auth-form__input">
+                    <select name="is_active" id="edit_prod_active" class="auth-form__input">
                         <option value="1">Đang hoạt động</option>
                         <option value="0">Ngừng kinh doanh (Khóa)</option>
                     </select>
                     <small style="color: #888;">* Nếu khóa, khách hàng sẽ không thấy danh mục này.</small>
                 </div>
-
-                <div class="auth-form__group">
-                    <label>Tên danh mục:</label>
-                    <input type="text" name="name" id="edit_name" class="auth-form__input" required>
-                </div><br>
-
-                <div class="auth-form__group">
-                    <label>Slug:</label>
-                    <input type="text" name="slug" id="edit_slug" class="auth-form__input" required>
-                </div><br>
-
-                <div class="auth-form__group">
-                    <label>Mô tả:</label>
-                    <textarea name="description" id="edit_description" class="auth-form__input" style="height:100px; padding:10px;"></textarea>
-                </div><br>
-
-                <div class="auth-form__group">
-                    <label>Ảnh hiện tại:</label><br>
-                    <img id="edit_preview" src="" width="80" style="border-radius:5px; margin: 10px 0;"><br>
-                    <label>Thay đổi ảnh (để trống nếu giữ nguyên):</label>
-                    <input type="file" name="image">
-                </div><br>
-
-                <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                    <button type="button" class="btn-secondary" onclick="document.getElementById('editModal').style.display='none'">Hủy</button>
+                <div class="modal__footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('editProdModal')">Hủy</button>
                     <button type="submit" class="btn-primary">Cập nhật danh mục</button>
                 </div>
             </form>
@@ -196,28 +196,122 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY is_active DESC, id
 </html>
 
 <script>
-    function openEditModal(category) {
-        // Điền dữ liệu vào các input trong Modal
-        document.getElementById('edit_id').value = category.id;
-        document.getElementById('edit_name').value = category.name;
-        document.getElementById('edit_slug').value = category.slug;
-        document.getElementById('edit_description').value = category.description;
-
-        // Đổ trạng thái vào select
-        document.getElementById('edit_is_active').value = category.is_active;
-
-        // Hiển thị ảnh cũ để xem trước
-        document.getElementById('edit_preview').src = category.image;
-
-        // Hiển thị Modal
-        document.getElementById('editModal').style.display = 'block';
+    // Hàm mở Modal
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Chống cuộn trang khi mở modal
     }
 
-    // Đóng modal khi click ra ngoài vùng trắng
+    // Hàm đóng Modal
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Cho phép cuộn lại
+    }
+
+    // Đóng modal khi click ra ngoài vùng xám
     window.onclick = function(event) {
-        let addModal = document.getElementById('addModal');
-        let editModal = document.getElementById('editModal');
-        if (event.target == addModal) addModal.style.display = "none";
-        if (event.target == editModal) editModal.style.display = "none";
+        const addModal = document.getElementById('addProdModal');
+        const editModal = document.getElementById('editProdModal'); // Nếu có
+        if (event.target == addModal) closeModal('addProdModal');
+        if (event.target == editModal) closeModal('editProdModal');
+    }
+
+    // Hàm xem trước ảnh khi chọn file
+    function previewImage(input) {
+        const container = document.getElementById('image_preview_container');
+        const preview = document.getElementById('add_preview');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                container.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    document.getElementById('product_image_input').addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('img_preview').setAttribute('src', e.target.result);
+                document.getElementById('image_preview_box').style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    function removePreview() {
+        document.getElementById('product_image_input').value = "";
+        document.getElementById('image_preview_box').style.display = 'none';
+    }
+
+
+
+
+    function openEditProdModal(category) {
+        // 1. Điền các trường văn bản và số
+        document.getElementById('edit_prod_id').value = category.id;
+        document.getElementById('edit_prod_name').value = category.name;
+        document.getElementById('edit_prod_desc').value = category.description;
+        document.getElementById('edit_prod_active').value = category.is_active;
+        // document.getElementById('edit_prod_active').checked = (parseInt(category.is_active) === 1);
+
+
+        // 3. Xử lý hiển thị ảnh Preview trong Modal
+        const previewImg = document.getElementById('edit_prod_preview');
+        if (category.image && category.image.trim() !== "") {
+            if (category.image.startsWith('https')) {
+                previewImg.src = category.image;
+            } else {
+                previewImg.src = category.image;
+            }
+        } else {
+            // Nếu null hoặc rỗng, dùng ảnh mặc định
+            previewImg.src = '../assets/images/no-image.png';
+        }
+        // if (category.image.startsWith('https')) {
+        //     // Nếu là link web
+        //     previewImg.src = category.image;
+        // } else {
+        //     // Nếu là file local (nhớ lùi 1 cấp thư mục để ra khỏi admin)
+        //     previewImg.src = category.image;
+        // }
+
+        // 4. Hiển thị Modal bằng hàm chung đã viết trước đó
+        // Reset lại trạng thái ảnh về mặc định (hiện cũ, ẩn mới)
+        document.getElementById('old_img_container').style.display = 'block';
+        document.getElementById('new_img_preview_container').style.display = 'none';
+        document.getElementById('edit_prod_image_input').value = "";
+
+
+        // Lắng nghe sự kiện chọn file
+        document.getElementById('edit_prod_image_input').addEventListener('change', function() {
+            const file = this.files[0];
+            const oldContainer = document.getElementById('old_img_container');
+            const newContainer = document.getElementById('new_img_preview_container');
+            const newPreviewImg = document.getElementById('edit_prod_new_preview');
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    // 1. Đổ dữ liệu ảnh mới vào thẻ img preview
+                    newPreviewImg.src = e.target.result;
+
+                    // 2. Ẩn ảnh cũ, hiện ảnh mới
+                    oldContainer.style.display = 'none';
+                    newContainer.style.display = 'block';
+                }
+
+                reader.readAsDataURL(file);
+            }
+        });
+
+        openModal('editProdModal');
     }
 </script>

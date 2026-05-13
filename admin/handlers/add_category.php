@@ -20,13 +20,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (in_array($ext, $allowed)) {
             // Tạo tên file duy nhất để không bị trùng (dùng timestamp + tên gốc đã lọc)
             $new_filename = time() . '_' . preg_replace('/[^A-Za-z0-9.]/', '_', $filename);
-            $target_dir = "./assets/images/categories/";
+            $target_dir = "../../assets/images/categories/";
 
             // Tạo thư mục nếu chưa có
             if (!file_exists($target_dir)) mkdir($target_dir, 0777, true);
 
             if (move_uploaded_file($_FILES['image']['tmp_name'], $target_dir . $new_filename)) {
-                $image_path = "assets/images/categories/" . $new_filename;
+                $image_path = "../../assets/images/categories/" . $new_filename;
             }
         }
     }
