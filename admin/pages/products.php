@@ -203,7 +203,7 @@ while ($cat = $categories->fetch_assoc()) {
     <!-- MODAL UPDATE -->
     <div id="editProdModal" class="modal">
         <div class="modal__content" style="max-width: 800px;">
-            <h3><i class="fas fa-edit"></i> Chỉnh sửa sản phẩm</h3>
+            <h3>Chỉnh sửa sản phẩm</h3>
 
             <form action="../handlers/edit_product.php" method="POST" enctype="multipart/form-data" class="grid-form">
                 <input type="hidden" name="id" id="edit_prod_id">

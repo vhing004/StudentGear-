@@ -107,7 +107,7 @@ $recent_orders = $conn->query($sql_recent);
                                         <?= $row['status'] ?>
                                     </span>
                                 </td>
-                                <td><a href="order_detail.php?id=<?= $row['id'] ?>" class="action-link">Xem chi tiết</a></td>
+                                <td><a href="./pages/orders.php" class="action-link">Xem chi tiết</a></td>
                             </tr>
                         <?php endwhile; ?>
                     </tbody>
