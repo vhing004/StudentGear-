@@ -199,23 +199,32 @@ $categories = $conn->query("SELECT * FROM categories ORDER BY is_active DESC, id
     // Hàm mở Modal
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden'; // Chống cuộn trang khi mở modal
+        modal.classList.remove('is-closing');
+        modal.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
     }
 
-    // Hàm đóng Modal
+    // Hàm đóng Modal kèm hiệu ứng
     function closeModal(modalId) {
         const modal = document.getElementById(modalId);
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto'; // Cho phép cuộn lại
+
+        // Thêm class closing để kích hoạt animation slideUp và fadeOut
+        modal.classList.add('is-closing');
+
+        // Đợi animation chạy xong (0.3s = 300ms) rồi mới ẩn hẳn
+        setTimeout(() => {
+            modal.classList.remove('is-open');
+            modal.classList.remove('is-closing');
+            document.body.style.overflow = 'auto';
+        }, 300);
     }
 
-    // Đóng modal khi click ra ngoài vùng xám
+    // Cập nhật lại window.onclick để cũng có hiệu ứng khi click ra ngoài
     window.onclick = function(event) {
-        const addModal = document.getElementById('addProdModal');
-        const editModal = document.getElementById('editProdModal'); // Nếu có
-        if (event.target == addModal) closeModal('addProdModal');
-        if (event.target == editModal) closeModal('editProdModal');
+        if (event.target.classList.contains('modal')) {
+            const modalId = event.target.id;
+            closeModal(modalId);
+        }
     }
 
     // Hàm xem trước ảnh khi chọn file

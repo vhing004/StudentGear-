@@ -10,6 +10,25 @@
   backdrop-filter: blur(4px); // Hiệu ứng mờ nền (hiện đại)
   overflow-y: auto;
   animation: fadeIn 0.3s ease-out;
+  // display: none;
+  opacity: 0; // Bắt đầu từ 0
+  transition: opacity 0.3s ease;
+  &.is-open {
+    display: block;
+    opacity: 1;
+
+    .modal__content {
+      animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+  }
+
+  &.is-closing {
+    opacity: 0;
+
+    .modal__content {
+      animation: slideUp 0.3s ease-in forwards;
+    }
+  }
 
   &__content {
     background: $white;
@@ -21,6 +40,8 @@
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
     position: relative;
     animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: translateY(-50px);
+    opacity: 0;
 
     h3 {
       color: $sidebar-bg;
@@ -125,6 +146,55 @@ select.auth-form__input {
   }
 }
 
+/* Định dạng chung cho Badge trạng thái */
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 20px; // Tạo hình viên thuốc (pill)
+  text-align: center;
+  min-width: 100px;
+  white-space: nowrap;
+}
+
+/* Các biến thể màu sắc dựa trên status */
+.badge-warning {
+  background-color: #fff4e5;
+  color: #ff9800;
+  border: 1px solid #ffe0b2;
+}
+
+.badge-info {
+  background-color: #e3f2fd;
+  color: #0288d1;
+  border: 1px solid #bbdefb;
+}
+
+.badge-primary {
+  background-color: #e8eaf6;
+  color: #3f51b5;
+  border: 1px solid #c5cae9;
+}
+
+.badge-success {
+  background-color: #edf7ed;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+.badge-danger {
+  background-color: #fdeded;
+  color: #d32f2f;
+  border: 1px solid #ffcdd2;
+}
+
+.badge-secondary {
+  background-color: #f5f5f5;
+  color: #757575;
+  border: 1px solid #e0e0e0;
+}
+
 // Animation
 @keyframes fadeIn {
   from {
@@ -135,6 +205,30 @@ select.auth-form__input {
   }
 }
 
+@keyframes slideDown {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Thêm keyframe cho hiệu ứng đóng
+@keyframes slideUp {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+}
+
+// Sửa lại slideDown để đảm bảo nó kết thúc ở trạng thái hiển thị
 @keyframes slideDown {
   from {
     transform: translateY(-50px);
