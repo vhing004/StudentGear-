@@ -13,14 +13,30 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
     exit();
 }
 
-// 1. Lấy danh sách sản phẩm kèm tên danh mục
+// 1. Lấy dữ liệu từ URL
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$category_filter = isset($_GET['category_filter']) ? $_GET['category_filter'] : '';
+
+// 2. Xây dựng câu truy vấn có điều kiện
 $sql = "SELECT p.*, c.name as category_name 
         FROM products p 
         LEFT JOIN categories c ON p.category_id = c.id 
-        ORDER BY p.is_active DESC, p.id DESC";
+        WHERE 1=1"; // Điều kiện mặc định để dễ nối chuỗi AND
+
+if (!empty($search)) {
+    // Tìm theo tên sản phẩm hoặc mô tả
+    $sql .= " AND (p.name LIKE '%$search%' OR p.description LIKE '%$search%')";
+}
+
+if (!empty($category_filter)) {
+    // Lọc theo ID danh mục
+    $sql .= " AND p.category_id = " . intval($category_filter);
+}
+
+$sql .= " ORDER BY p.is_active DESC, p.id DESC";
 $products = $conn->query($sql);
 
-// 2. Lấy danh sách danh mục để đổ vào Select Box trong Modal
+// 3. Lấy danh sách danh mục (giữ nguyên để đổ vào select box)
 $categories = $conn->query("SELECT id, name FROM categories WHERE is_active = 1");
 $cat_list = [];
 while ($cat = $categories->fetch_assoc()) {
@@ -35,6 +51,7 @@ while ($cat = $categories->fetch_assoc()) {
     <meta charset="UTF-8">
     <title>Quản lý sản phẩm - StudentGear</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" href="../../assets/images/admin.webp" type="image/x-icon">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/admin.css">
 </head>
 
@@ -44,10 +61,41 @@ while ($cat = $categories->fetch_assoc()) {
 
         <main class="main-content">
             <header class="main-content__header">
-                <h2>Danh sách sản phẩm</h2>
-                <button class="btn-primary" onclick="openModal('addProdModal')">
-                    <i class="fas fa-plus"></i> Thêm sản phẩm
-                </button>
+                <h2>Quản lý sản phẩm</h2>
+                <div class="header-actions" style="display: flex; gap: 15px;">
+                    <form method="GET" action="" class="search-form" style="display: flex; gap: 10px;">
+                        <div class="auth-form__group" style="margin-bottom: 0;">
+                            <input type="text" name="search" class="auth-form__input"
+                                placeholder="Tìm tên sản phẩm..."
+                                value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+                        </div>
+
+                        <div class="auth-form__group" style="margin-bottom: 0;">
+                            <select name="category_filter" class="auth-form__input" onchange="this.form.submit()">
+                                <option value="">Tất cả danh mục</option>
+                                <?php foreach ($cat_list as $cat): ?>
+                                    <option value="<?= $cat['id'] ?>" <?= isset($_GET['category_filter']) && $_GET['category_filter'] == $cat['id'] ? 'selected' : '' ?>>
+                                        <?= $cat['name'] ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-search"></i>
+                        </button>
+
+                        <?php if (isset($_GET['search']) || isset($_GET['category_filter'])): ?>
+                            <a href="products.php" class="btn-secondary" style="display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                                <i class="fas fa-undo"></i>
+                            </a>
+                        <?php endif; ?>
+                    </form>
+
+                    <button class="btn-primary" onclick="openModal('addProdModal')">
+                        <i class="fas fa-plus"></i> Thêm sản phẩm
+                    </button>
+                </div>
             </header>
 
             <section class="table-container">
@@ -65,64 +113,70 @@ while ($cat = $categories->fetch_assoc()) {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($row = $products->fetch_assoc()): ?>
+                        <?php if ($products->num_rows > 0): ?>
+                            <?php while ($row = $products->fetch_assoc()): ?>
+                                <tr>
+                                    <td>
+                                        <div class="product-img-wrapper">
+                                            <?php
+                                            $img_src = $row['image'];
+                                            $final_src = "";
+
+                                            // TRƯỜNG HỢP 1: Nếu là link từ internet (bắt đầu bằng http)
+                                            if (strpos($img_src, 'http') === 0) {
+                                                $final_src = $img_src;
+                                            }
+                                            // TRƯỜNG HỢP 2: Nếu là file upload trong máy (có tồn tại file)
+                                            elseif (!empty($img_src) && file_exists($img_src)) {
+                                                $final_src = $img_src;
+                                            }
+                                            // TRƯỜNG HỢP 3: Ảnh trống hoặc file không tồn tại
+                                            else {
+                                                $final_src = "../../assets/images/no-image.png";
+                                            }
+                                            ?>
+
+                                            <img src="<?= $final_src ?>"
+                                                alt="<?= htmlspecialchars($row['name']) ?>">
+                                        </div>
+                                    </td>
+                                    <td style="max-width: 200px;"><strong><?= htmlspecialchars($row['name']) ?></strong></td>
+                                    <td>
+                                        <small>Nhập: <?= number_format($row['cost_price'], 0, ',', '.') ?>₫</small><br>
+                                        <strong>Bán: <?= number_format($row['price'], 0, ',', '.') ?>₫</strong>
+                                    </td>
+                                    <td><?= $row['category_name'] ?></td>
+                                    <td><?= $row['discount_percent'] ?>%</td>
+                                    <td>
+                                        <i class="fa-star <?= $row['is_featured'] ? 'fa-solid text-warning' : 'fa-regular' ?>"></i>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge <?= $row['is_active'] ? 'badge-success' : 'badge-warning' ?>">
+                                            <?= $row['is_active'] ? 'Hoạt động' : 'Ngừng kinh doanh' ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="action-link"
+                                            onclick='openEditProdModal(<?= json_encode($row, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+
+                                        <a href="../handlers/delete_product.php?id=<?= $row['id'] ?>"
+                                            class="action-link text-danger"
+                                            onclick="return confirm('Bạn có muốn ngừng kinh doanh sản phẩm này?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
                             <tr>
-                                <td>
-                                    <div class="product-img-wrapper">
-                                        <?php
-                                        $img_src = $row['image'];
-                                        $final_src = "";
-
-                                        // TRƯỜNG HỢP 1: Nếu là link từ internet (bắt đầu bằng http)
-                                        if (strpos($img_src, 'http') === 0) {
-                                            $final_src = $img_src;
-                                        }
-                                        // TRƯỜNG HỢP 2: Nếu là file upload trong máy (có tồn tại file)
-                                        elseif (!empty($img_src) && file_exists($img_src)) {
-                                            $final_src = $img_src;
-                                        }
-                                        // TRƯỜNG HỢP 3: Ảnh trống hoặc file không tồn tại
-                                        else {
-                                            $final_src = "../../assets/images/no-image.png";
-                                        }
-                                        ?>
-
-                                        <img src="<?= $final_src ?>"
-                                            alt="<?= htmlspecialchars($row['name']) ?>">
-                                    </div>
-                                </td>
-                                <td style="max-width: 200px;"><strong><?= htmlspecialchars($row['name']) ?></strong></td>
-                                <td>
-                                    <small>Nhập: <?= number_format($row['cost_price'], 0, ',', '.') ?>₫</small><br>
-                                    <strong>Bán: <?= number_format($row['price'], 0, ',', '.') ?>₫</strong>
-                                </td>
-                                <td><?= $row['category_name'] ?></td>
-                                <td><?= $row['discount_percent'] ?>%</td>
-                                <td>
-                                    <i class="fa-star <?= $row['is_featured'] ? 'fa-solid text-warning' : 'fa-regular' ?>"></i>
-                                </td>
-                                <td>
-                                    <span class="status-badge <?= $row['is_active'] ? 'badge-success' : 'badge-warning' ?>">
-                                        <?= $row['is_active'] ? 'Hoạt động' : 'Ngừng kinh doanh' ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <!-- <button class="action-link" onclick='openEditProdModal(<?= json_encode($row, JSON_HEX_APOS) ?>)'>
-                                        <i class="fas fa-edit"></i>
-                                    </button> -->
-                                    <button class="action-link"
-                                        onclick='openEditProdModal(<?= json_encode($row, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-
-                                    <a href="handlers/delete_product.php?id=<?= $row['id'] ?>"
-                                        class="action-link text-danger"
-                                        onclick="return confirm('Bạn có muốn ngừng kinh doanh sản phẩm này?')">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
+                                <td colspan="8" style="text-align: center; padding: 50px; color: #888;">
+                                    <i class="fas fa-search-minus" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
+                                    Không tìm thấy sản phẩm nào phù hợp với từ khóa "<strong><?= htmlspecialchars($search) ?></strong>"
                                 </td>
                             </tr>
-                        <?php endwhile; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </section>
@@ -293,6 +347,20 @@ while ($cat = $categories->fetch_assoc()) {
     </div>
 
 </body>
+
+<!-- THÔNG BÁO KHI XÓA SẢN PHẨM -->
+<?php if (isset($_GET['msg'])): ?>
+    <script>
+        const msg = "<?= $_GET['msg'] ?>";
+        if (msg === 'error_has_order') {
+            alert("❌ Không thể xóa sản phẩm này vì nó đã có trong đơn hàng của khách! Hãy chuyển sang trạng thái 'Ngừng kinh doanh' thay vì xóa.");
+        } else if (msg === 'deleted') {
+            alert("✅ Đã xóa sản phẩm thành công.");
+        } else if (msg === 'error_delete') {
+            alert("⚠️ Có lỗi xảy ra trong quá trình xóa.");
+        }
+    </script>
+<?php endif; ?>
 
 </html>
 <script>

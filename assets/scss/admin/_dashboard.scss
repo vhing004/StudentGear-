@@ -260,6 +260,24 @@
   object-fit: cover; /* Giúp ảnh luôn lấp đầy ô vuông mà không bị méo */
   object-position: center;
 }
+.search-form {
+  background: #fff;
+  padding: 5px;
+  border-radius: 10px;
+
+  .auth-form__input {
+    padding: 8px 15px; // Nhỏ hơn input bình thường một chút
+    min-width: 200px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
 
 .action_link {
   cursor: pointer;

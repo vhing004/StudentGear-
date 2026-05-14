@@ -8,11 +8,29 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
     exit();
 }
 
-// Truy vấn danh sách đơn hàng (Join với users để lấy tên khách hàng)
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$status_filter = isset($_GET['status_filter']) ? $_GET['status_filter'] : '';
+
+// 1. Xây dựng câu SQL cơ bản
 $sql = "SELECT o.*, u.fullname 
         FROM orders o 
         LEFT JOIN users u ON o.user_id = u.id 
-        ORDER BY o.created_at DESC";
+        WHERE 1=1"; // Mẹo để nối chuỗi AND dễ hơn
+
+// 2. Thêm điều kiện tìm kiếm văn bản (Mã đơn, SĐT, Tên)
+if (!empty($search)) {
+    $sql .= " AND (o.order_code LIKE '%$search%' 
+                OR o.shipping_phone LIKE '%$search%' 
+                OR o.shipping_name LIKE '%$search%' 
+                OR u.fullname LIKE '%$search%')";
+}
+
+// 3. Thêm điều kiện lọc trạng thái
+if (!empty($status_filter)) {
+    $sql .= " AND o.status = '$status_filter'";
+}
+
+$sql .= " ORDER BY o.created_at DESC";
 $orders = $conn->query($sql);
 
 // Hàm hỗ trợ hiển thị Badge trạng thái
@@ -56,6 +74,7 @@ function getStatusBadge($status)
     <meta charset="UTF-8">
     <title>Quản lý đơn hàng - StudentGear</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" href="../../assets/images/admin.webp" type="image/x-icon">
     <link rel="stylesheet" href="../../assets/css/admin.css">
 </head>
 
@@ -67,7 +86,34 @@ function getStatusBadge($status)
             <header class="main-content__header">
                 <h2>Quản lý đơn hàng</h2>
                 <div class="header-actions">
-                    <span class="total-orders">Tổng số: <?= $orders->num_rows ?> đơn</span>
+                    <form method="GET" action="" class="search-form" style="display: flex; gap: 10px;">
+                        <div class="auth-form__group" style="margin-bottom: 0;">
+                            <input type="text" name="search" class="auth-form__input"
+                                placeholder="Mã đơn, SĐT, Tên..."
+                                value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+                        </div>
+
+                        <div class="auth-form__group" style="margin-bottom: 0;">
+                            <select name="status_filter" class="auth-form__input" onchange="this.form.submit()">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="pending" <?= isset($_GET['status_filter']) && $_GET['status_filter'] == 'pending' ? 'selected' : '' ?>>Chờ xử lý</option>
+                                <option value="confirmed" <?= isset($_GET['status_filter']) && $_GET['status_filter'] == 'confirmed' ? 'selected' : '' ?>>Đã xác nhận</option>
+                                <option value="shipping" <?= isset($_GET['status_filter']) && $_GET['status_filter'] == 'shipping' ? 'selected' : '' ?>>Đang giao</option>
+                                <option value="delivered" <?= isset($_GET['status_filter']) && $_GET['status_filter'] == 'delivered' ? 'selected' : '' ?>>Đã giao</option>
+                                <option value="cancelled" <?= isset($_GET['status_filter']) && $_GET['status_filter'] == 'cancelled' ? 'selected' : '' ?>>Đã hủy</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-primary" style="padding: 0 20px;">
+                            <i class="fas fa-search"></i>
+                        </button>
+
+                        <?php if (isset($_GET['search']) || isset($_GET['status_filter'])): ?>
+                            <a href="orders.php" class="btn-secondary" style="display: flex; align-items: center; text-decoration: none;">
+                                <i class="fas fa-undo"></i>
+                            </a>
+                        <?php endif; ?>
+                    </form>
                 </div>
             </header>
 
@@ -85,35 +131,45 @@ function getStatusBadge($status)
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($row = $orders->fetch_assoc()): ?>
+                        <?php if ($orders->num_rows > 0): ?>
+                            <?php while ($row = $orders->fetch_assoc()): ?>
+                                <tr>
+                                    <td><strong>#<?= $row['order_code'] ?></strong></td>
+                                    <td>
+                                        <div class="user-info">
+                                            <span><?= htmlspecialchars($row['fullname'] ?? $row['shipping_name']) ?></span><br>
+                                            <small style="color: #888;"><?= $row['shipping_phone'] ?></small>
+                                        </div>
+                                    </td>
+                                    <td><b class="text-primary"><?= number_format($row['total_price'], 0, ',', '.') ?>đ</b></td>
+                                    <td>
+                                        <small><?= strtoupper($row['payment_method']) ?></small><br>
+                                        <small class="<?= $row['payment_status'] == 'paid' ? 'text-success' : 'text-danger' ?>">
+                                            (<?= $row['payment_status'] == 'paid' ? 'Đã thanh toán' : 'Chưa trả' ?>)
+                                        </small>
+                                    </td>
+                                    <td><?= getStatusBadge($row['status']) ?></td>
+                                    <td><?= date('d/m/Y H:i', strtotime($row['created_at'])) ?></td>
+                                    <td>
+                                        <button class="action-link" title="Xem chi tiết"
+                                            onclick="viewOrderDetails(<?= $row['id'] ?>, '<?= $row['order_code'] ?>')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="action-link" onclick='openEditOrderModal(<?= json_encode($row) ?>)'>
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
                             <tr>
-                                <td><strong>#<?= $row['order_code'] ?></strong></td>
-                                <td>
-                                    <div class="user-info">
-                                        <span><?= htmlspecialchars($row['fullname'] ?? $row['shipping_name']) ?></span><br>
-                                        <small style="color: #888;"><?= $row['shipping_phone'] ?></small>
-                                    </div>
-                                </td>
-                                <td><b class="text-primary"><?= number_format($row['total_price'], 0, ',', '.') ?>đ</b></td>
-                                <td>
-                                    <small><?= strtoupper($row['payment_method']) ?></small><br>
-                                    <small class="<?= $row['payment_status'] == 'paid' ? 'text-success' : 'text-danger' ?>">
-                                        (<?= $row['payment_status'] == 'paid' ? 'Đã thanh toán' : 'Chưa trả' ?>)
-                                    </small>
-                                </td>
-                                <td><?= getStatusBadge($row['status']) ?></td>
-                                <td><?= date('d/m/Y H:i', strtotime($row['created_at'])) ?></td>
-                                <td>
-                                    <button class="action-link" title="Xem chi tiết"
-                                        onclick="viewOrderDetails(<?= $row['id'] ?>, '<?= $row['order_code'] ?>')">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="action-link" onclick='openEditOrderModal(<?= json_encode($row) ?>)'>
-                                        <i class="fas fa-edit"></i>
-                                    </button>
+                                <td colspan="7" style="text-align: center; padding: 50px;">
+                                    <i class="fas fa-box-open" style="font-size: 40px; color: #ccc; display: block; margin-bottom: 10px;"></i>
+                                    <p>Không tìm thấy đơn hàng nào phù hợp với yêu cầu.</p>
+                                    <a href="orders.php" style="color: var(--primary-color);">Xem tất cả đơn hàng</a>
                                 </td>
                             </tr>
-                        <?php endwhile; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </section>
