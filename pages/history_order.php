@@ -7,25 +7,52 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+// $user_id = $_SESSION['user_id'];
+// // Lấy trạng thái từ URL để lọc (Tất cả, Chờ xác nhận, Hoàn thành...)
+// $status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
+
+// // Truy vấn danh sách đơn hàng
+// $sql_orders = "SELECT * FROM orders WHERE user_id = '$user_id'";
+// if ($status_filter !== 'all') {
+//     $sql_orders .= " AND status = '$status_filter'";
+// }
+// $sql_orders .= " ORDER BY created_at DESC";
+// $res_orders = $conn->query($sql_orders);
+
 $user_id = $_SESSION['user_id'];
-// Lấy trạng thái từ URL để lọc (Tất cả, Chờ xác nhận, Hoàn thành...)
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
 
-// Truy vấn danh sách đơn hàng
+// Khởi tạo câu SQL cơ bản
 $sql_orders = "SELECT * FROM orders WHERE user_id = '$user_id'";
-if ($status_filter !== 'all') {
+
+// Cập nhật điều kiện lọc
+if ($status_filter === 'shipping') {
+    // Nếu là tab Vận chuyển, lấy cả đơn 'confirmed' và 'shipping'
+    $sql_orders .= " AND (status = 'confirmed' OR status = 'shipping')";
+} elseif ($status_filter !== 'all') {
+    // Các trạng thái khác (pending, delivered, cancelled) giữ nguyên
     $sql_orders .= " AND status = '$status_filter'";
 }
+
 $sql_orders .= " ORDER BY created_at DESC";
 $res_orders = $conn->query($sql_orders);
 ?>
 <main class="order-history-page">
     <div class="container">
         <!-- Tab điều hướng trạng thái -->
-        <div class="order-tabs">
+        <!-- <div class="order-tabs">
             <a href="?status=all" class="<?= $status_filter == 'all' ? 'active' : '' ?>">Tất cả</a>
             <a href="?status=pending" class="<?= $status_filter == 'pending' ? 'active' : '' ?>">Chờ thanh toán</a>
             <a href="?status=confirmed" class="<?= $status_filter == 'confirmed' ? 'active' : '' ?>">Vận chuyển</a>
+            <a href="?status=delivered" class="<?= $status_filter == 'delivered' ? 'active' : '' ?>">Hoàn thành</a>
+            <a href="?status=cancelled" class="<?= $status_filter == 'cancelled' ? 'active' : '' ?>">Đã hủy</a>
+        </div> -->
+        <div class="order-tabs">
+            <a href="?status=all" class="<?= $status_filter == 'all' ? 'active' : '' ?>">Tất cả</a>
+            <a href="?status=pending" class="<?= $status_filter == 'pending' ? 'active' : '' ?>">Chờ xác nhận</a>
+
+            <a href="?status=shipping" class="<?= $status_filter == 'shipping' ? 'active' : '' ?>">Vận chuyển</a>
+
             <a href="?status=delivered" class="<?= $status_filter == 'delivered' ? 'active' : '' ?>">Hoàn thành</a>
             <a href="?status=cancelled" class="<?= $status_filter == 'cancelled' ? 'active' : '' ?>">Đã hủy</a>
         </div>

@@ -97,3 +97,200 @@
     }
   }
 }
+
+.custom-timeline {
+  position: relative;
+  padding: 20px 0 20px 30px;
+  margin-left: 10px;
+  border-left: 2px solid #e0e0e0;
+}
+
+.timeline-step {
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.timeline-step:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -39px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px #3498db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 8px;
+  z-index: 1;
+}
+
+.timeline-content {
+  background: #f9f9f9;
+  padding: 12px 15px;
+  border-radius: 8px;
+}
+
+.timeline-title {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.timeline-date {
+  color: #888;
+  font-size: 12px;
+}
+
+.timeline-note {
+  margin-top: 5px;
+  font-size: 13px;
+  color: #666;
+  font-style: italic;
+}
+
+.timeline-v2 {
+  position: relative;
+  padding-left: 20px;
+  margin: 20px 0;
+}
+
+/* Đường kẻ dọc xám nhạt nối các icon */
+.timeline-v2::before {
+  content: "";
+  position: absolute;
+  left: 27px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e0e0e0;
+  z-index: 1;
+}
+
+.timeline-v2-item {
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 20px;
+  z-index: 2;
+}
+
+.timeline-v2-icon {
+  position: absolute;
+  left: -15px;
+  top: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+  border: 3px solid #fff; /* Tạo khoảng trắng với đường kẻ */
+}
+
+.timeline-v2-content {
+  padding: 12px 15px;
+  border-radius: 8px;
+  border-left: 4px solid;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.timeline-v2-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.timeline-v2-header strong {
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.timeline-v2-header small {
+  color: #888;
+}
+
+.timeline-v2-note {
+  margin: 0;
+  font-size: 13px;
+  color: #555;
+  font-style: italic;
+}
+
+.payment-status {
+  margin-bottom: 20px;
+}
+.order-history {
+  padding: 20px;
+  background-color: #fff;
+  margin: 20px 0;
+}
+
+/* 1. Dạng Badge (Admin dùng) */
+.badge-warning {
+  background: #fff4e5;
+  color: #ff9800;
+  border: 1px solid #ffe0b2;
+}
+.badge-info {
+  background: #e3f2fd;
+  color: #0288d1;
+  border: 1px solid #bbdefb;
+}
+.badge-primary {
+  background: #e8eaf6;
+  color: #3f51b5;
+  border: 1px solid #c5cae9;
+}
+.badge-success {
+  background: #edf7ed;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+.badge-danger {
+  background: #fdeded;
+  color: #d32f2f;
+  border: 1px solid #ffcdd2;
+}
+
+/* 2. Dạng Highlight Text (Header chi tiết dùng) */
+.status-pending {
+  color: #ff9800;
+  background: #fff4e5;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.status-confirmed {
+  color: #0288d1;
+  background: #e3f2fd;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.status-shipping {
+  color: #3f51b5;
+  background: #e8eaf6;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.status-delivered {
+  color: #2e7d32;
+  background: #edf7ed;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  overflow: hidden;
+}
+.status-cancelled {
+  color: #d32f2f;
+  background: #fdeded;
+  padding: 2px 8px;
+  border-radius: 4px;
+}

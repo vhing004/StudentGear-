@@ -65,6 +65,39 @@ function getStatusBadge($status)
     }
     return "<span class='status-badge $class'>$text</span>";
 }
+
+// LOGIC CẬP NHẬT TRẠNG THÁI
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'update_status') {
+    $order_id = intval($_POST['order_id']);
+    $new_status = $_POST['status'];
+    $note = $_POST['note'] ?? '';
+    $admin_id = $_SESSION['user_id'];
+
+    // 1. Lấy trạng thái cũ để lưu vào lịch sử
+    $stmt = $conn->prepare("SELECT status FROM orders WHERE id = ?");
+    $stmt->bind_param("i", $order_id);
+    $stmt->execute();
+    $old_status = $stmt->get_result()->fetch_assoc()['status'];
+
+    // 2. Cập nhật bảng orders
+    // Nếu giao hàng thành công thì tự động chuyển trạng thái thanh toán thành 'paid'
+    $payment_update = ($new_status === 'delivered') ? ", payment_status = 'paid', delivered_at = NOW()" : "";
+    $sql_update = "UPDATE orders SET status = ? $payment_update WHERE id = ?";
+    $stmt_up = $conn->prepare($sql_update);
+    $stmt_up->bind_param("si", $new_status, $order_id);
+
+    if ($stmt_up->execute()) {
+        // 3. Lưu vào bảng order_status_history
+        $sql_hist = "INSERT INTO order_status_history (order_id, old_status, new_status, note, changed_by) 
+                    VALUES (?, ?, ?, ?, ?)";
+        $stmt_hist = $conn->prepare($sql_hist);
+        $stmt_hist->bind_param("isssi", $order_id, $old_status, $new_status, $note, $admin_id);
+        $stmt_hist->execute();
+
+        header("Location: orders.php?msg=success");
+        exit();
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -238,7 +271,7 @@ function getStatusBadge($status)
     </div>
 
     <!-- EDIT MODAL ORDER -->
-    <div id="editOrderModal" class="modal">
+    <!-- <div id="editOrderModal" class="modal">
         <div class="modal__content">
             <h3>Cập nhật đơn hàng #<span id="display_order_code"></span></h3>
 
@@ -265,6 +298,40 @@ function getStatusBadge($status)
                 <div class="modal__footer">
                     <button type="button" class="btn-secondary" onclick="closeModal('editOrderModal')">Hủy</button>
                     <button type="submit" class="btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div> -->
+
+    <div id="editOrderModal" class="modal">
+        <div class="modal__content">
+            <h3>Cập nhật đơn hàng #<span id="display_order_code"></span></h3>
+
+            <form action="" method="POST" class="grid-form">
+                <input type="hidden" name="action" value="update_status">
+                <input type="hidden" name="order_id" id="edit_order_id">
+
+                <div class="auth-form__group">
+                    <label>Trạng thái mới</label>
+                    <select name="status" id="edit_order_status" class="auth-form__input">
+                        <option value="pending">Chờ xử lý</option>
+                        <option value="confirmed">Đã xác nhận</option>
+                        <option value="shipping">Đang giao hàng</option>
+                        <option value="delivered">Đã giao hàng thành công</option>
+                        <option value="cancelled">Hủy đơn hàng</option>
+                        <option value="returned">Trả hàng / Hoàn tiền</option>
+                    </select>
+                </div>
+
+                <div class="auth-form__group">
+                    <label>Ghi chú thay đổi (Sẽ hiển thị cho khách hàng)</label>
+                    <textarea name="note" class="auth-form__input" rows="3"
+                        placeholder="Ví dụ: Đã xác nhận qua điện thoại, shipper đang lấy hàng..."></textarea>
+                </div>
+
+                <div class="modal__footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('editOrderModal')">Hủy</button>
+                    <button type="submit" class="btn-primary">Cập nhật ngay</button>
                 </div>
             </form>
         </div>
@@ -381,6 +448,14 @@ function getStatusBadge($status)
             // Gọi hàm mở modal đã có animation của bạn
             openModal('editOrderModal');
         }
+
+        // function openEditOrderModal(order) {
+        //     document.getElementById('edit_order_id').value = order.id;
+        //     document.getElementById('display_order_code').innerText = order.order_code;
+        //     document.getElementById('edit_order_status').value = order.status;
+
+        //     openModal('editOrderModal');
+        // }
     </script>
 </body>
 
