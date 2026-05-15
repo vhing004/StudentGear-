@@ -14,7 +14,7 @@
       font-weight: 500;
     }
     .status-highlight {
-      color: #ee4d2d;
+      color: $hover;
       font-weight: bold;
     }
   }
@@ -34,7 +34,7 @@
   .timeline {
     list-style: none;
     padding-left: 20px;
-    border-left: 2px solid #ee4d2d;
+    border-left: 2px solid $hover;
     &-item {
       position: relative;
       margin-bottom: 20px;
@@ -45,7 +45,7 @@
         top: 5px;
         width: 10px;
         height: 10px;
-        background: #ee4d2d;
+        background: $hover;
         border-radius: 50%;
       }
       .time {
@@ -77,7 +77,7 @@
       }
     }
     .price {
-      color: #ee4d2d;
+      color: $hover;
     }
   }
 
@@ -92,7 +92,7 @@
     }
     .grand-total {
       font-size: 2rem;
-      color: #ee4d2d;
+      color: $hover;
       font-weight: bold;
     }
   }

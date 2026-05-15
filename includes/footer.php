@@ -3,9 +3,9 @@
         <div class="footer__left">
             <h3 class="footer__title">STUDENTGEAR - Phụ Kiện Sinh Viên</h3>
             <ul class="footer__list">
-                <li>Hà Nội: PCC1 Triều Khúc, Thanh Xuân Nam, Thanh Xuân, Hà Nội</li>
+                <li>Hà Nội: Sân Vận Động Bắc Từ Liêm, Hà Nội</li>
                 <li>Sài Gòn: TTTM Sense City Lã Xuân Oai, quận 9, TP HCM</li>
-                <li>Hotline: <a href="tel:0867775586">0867775586</a> - <a href="tel:0989498757">0989498757</a></li>
+                <li>Hotline: <a href="tel:0867775586">0999999999</a> - <a href="tel:0989498757">0888888888</a></li>
             </ul>
             <div class="footer__left-bottom">
                 <div class="footer__left-map">
@@ -16,7 +16,7 @@
                 <footer__left-pay>
                     <h4 class="footer__sub-title">CHẤP NHẬN THANH TOÁN</h4>
                     <div class="footer__payment">
-                        <img src="path/to/visa-master-atm.png" alt="Payment methods">
+                        <img src="<?= BASE_URL ?>assets/images/payment1.png" alt="Payment methods">
                     </div>
                 </footer__left-pay>
             </div>
@@ -30,7 +30,7 @@
                         <li><a href="#">Giới thiệu</a></li>
                         <li><a href="#">Liên hệ</a></li>
                         <li><a href="#">Hướng dẫn mua hàng</a></li>
-                        <li><a href="#" class="highlight">Hướng dẫn thanh toán</a></li>
+                        <li><a href="#">Hướng dẫn thanh toán</a></li>
                     </ul>
                 </div>
 
@@ -46,8 +46,8 @@
                 <div class="footer__col">
                     <h3 class="footer__title">HỖ TRỢ</h3>
                     <ul class="footer__list">
-                        <li>Hà Nội: 0867775586</li>
-                        <li>Sài Gòn: 0989498757</li>
+                        <li>Hà Nội: 0979071420</li>
+                        <li>Sài Gòn: 0889390995</li>
                     </ul>
 
                 </div>

@@ -1,5 +1,5 @@
 .footer {
-  font-family: "Arial", sans-serif;
+  // font-family: "Arial", sans-serif;
   color: #333;
   background: #ffeb01;
   padding: 40px 0;
@@ -21,8 +21,8 @@
     }
     & iframe {
       margin-top: 15px;
-      width: 250px;
-      height: 250px;
+      width: 200px;
+      height: 200px;
     }
     &-bottom {
       display: flex;
