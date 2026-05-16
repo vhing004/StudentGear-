@@ -11,13 +11,21 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $status_filter = isset($_GET['status_filter']) ? $_GET['status_filter'] : '';
 
+// --- CẬP NHẬT LOGIC: Nhận thêm bộ lọc user_id từ trang quản lý khách hàng ---
+$target_user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+
 // 1. Xây dựng câu SQL cơ bản
 $sql = "SELECT o.*, u.fullname 
         FROM orders o 
         LEFT JOIN users u ON o.user_id = u.id 
         WHERE 1=1"; // Mẹo để nối chuỗi AND dễ hơn
 
-// 2. Thêm điều kiện tìm kiếm văn bản (Mã đơn, SĐT, Tên)
+// 2. Thêm điều kiện lọc theo Khách hàng cụ thể (nếu được chuyển hướng sang)
+if ($target_user_id > 0) {
+    $sql .= " AND o.user_id = $target_user_id";
+}
+
+// 3. Thêm điều kiện tìm kiếm văn bản (Mã đơn, SĐT, Tên)
 if (!empty($search)) {
     $sql .= " AND (o.order_code LIKE '%$search%' 
                 OR o.shipping_phone LIKE '%$search%' 
@@ -25,13 +33,26 @@ if (!empty($search)) {
                 OR u.fullname LIKE '%$search%')";
 }
 
-// 3. Thêm điều kiện lọc trạng thái
+// 4. Thêm điều kiện lọc trạng thái
 if (!empty($status_filter)) {
     $sql .= " AND o.status = '$status_filter'";
 }
 
 $sql .= " ORDER BY o.created_at DESC";
 $orders = $conn->query($sql);
+
+// --- CẬP NHẬT LOGIC: Tạo tiêu đề động báo bộ lọc khách hàng ---
+$filter_title = "";
+if ($target_user_id > 0) {
+    // Truy vấn nhanh lấy tên khách hàng đang lọc để hiển thị lên Header giao diện
+    $stmt_user = $conn->prepare("SELECT fullname, username FROM users WHERE id = ?");
+    $stmt_user->bind_param("i", $target_user_id);
+    $stmt_user->execute();
+    $user_info = $stmt_user->get_result()->fetch_assoc();
+    if ($user_info) {
+        $filter_title = ": " . htmlspecialchars($user_info['fullname'] ?? $user_info['username']);
+    }
+}
 
 // Hàm hỗ trợ hiển thị Badge trạng thái
 function getStatusBadge($status)
@@ -66,7 +87,7 @@ function getStatusBadge($status)
     return "<span class='status-badge $class'>$text</span>";
 }
 
-// LOGIC CẬP NHẬT TRẠNG THÁI
+// LOGIC CẬP NHẬT TRẠNG THÁI [Mã POST giữ nguyên không đổi]
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'update_status') {
     $order_id = intval($_POST['order_id']);
     $new_status = $_POST['status'];
@@ -94,7 +115,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         $stmt_hist->bind_param("isssi", $order_id, $old_status, $new_status, $note, $admin_id);
         $stmt_hist->execute();
 
-        header("Location: orders.php?msg=success");
+        // Bảo lưu tham số user_id trên URL sau khi redirect để giữ nguyên bộ lọc (nếu có)
+        $redirect_url = "orders.php?msg=success";
+        if ($target_user_id > 0) {
+            $redirect_url .= "&user_id=" . $target_user_id;
+        }
+        header("Location: " . $redirect_url);
         exit();
     }
 }
@@ -117,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 
         <main class="main-content">
             <header class="main-content__header">
-                <h2>Quản lý đơn hàng</h2>
+                <h2>Quản lý đơn hàng<?= $filter_title ?></h2>
                 <div class="header-actions">
                     <form method="GET" action="" class="search-form" style="display: flex; gap: 10px;">
                         <div class="auth-form__group" style="margin-bottom: 0;">

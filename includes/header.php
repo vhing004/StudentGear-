@@ -71,7 +71,7 @@ if (isset($_SESSION['user_id'])) {
                             <?php if (isset($_SESSION['user_id'])): ?>
                                 <div class="header_user">
                                     <div class="header_user-info">
-                                        <i class="fa-solid fa-circle-user"></i>
+                                        <i class="fa-solid fa-user-graduate"></i>
                                         <span class="header_user-name"><?php echo htmlspecialchars($_SESSION['fullname']); ?></span>
                                     </div>
 

@@ -1,0 +1,62 @@
+.sidebar {
+  width: 260px;
+  background: $sidebar-bg;
+  color: $white;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  flex-shrink: 0;
+
+  &__brand {
+    padding: 25px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    h4 {
+      text-decoration: none;
+      display: block;
+      text-transform: uppercase;
+      font-size: 25px;
+      font-weight: 700;
+      font-style: italic;
+      font-family: cursive;
+    }
+  }
+
+  &__nav {
+    padding: 20px 0;
+
+    a {
+      display: flex;
+      align-items: center;
+      padding: 15px 25px;
+      color: $text-muted;
+      text-decoration: none;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+
+      i {
+        width: 20px;
+        margin-right: 15px;
+        font-size: 18px;
+      }
+
+      &:hover,
+      &.active {
+        background: $sidebar-hover;
+        color: $white;
+        border-left-color: $accent-blue;
+      }
+
+      &.text-danger:hover {
+        border-left-color: $primary-color;
+        color: #ff7675;
+      }
+    }
+  }
+
+  &__divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 15px 25px;
+  }
+}

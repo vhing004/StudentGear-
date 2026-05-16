@@ -1,0 +1,33 @@
+// Table Styles
+.table-container {
+  background: $white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+
+  h5 {
+    font-size: 18px;
+    margin-bottom: 25px;
+    color: #444;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead th {
+      text-align: left;
+      padding: 15px;
+      border-bottom: 2px solid $border-color;
+      color: #888;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    tbody td {
+      padding: 8px;
+      border-bottom: 1px solid $border-color;
+      font-size: 15px;
+    }
+  }
+}

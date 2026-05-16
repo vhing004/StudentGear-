@@ -4,69 +4,6 @@
   min-height: 100vh;
 }
 
-.sidebar {
-  width: 260px;
-  background: $sidebar-bg;
-  color: $white;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  flex-shrink: 0;
-
-  &__brand {
-    padding: 25px;
-    text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    h4 {
-      text-decoration: none;
-      display: block;
-      text-transform: uppercase;
-      font-size: 25px;
-      font-weight: 700;
-      font-style: italic;
-      font-family: cursive;
-    }
-  }
-
-  &__nav {
-    padding: 20px 0;
-
-    a {
-      display: flex;
-      align-items: center;
-      padding: 15px 25px;
-      color: $text-muted;
-      text-decoration: none;
-      transition: all 0.3s;
-      border-left: 4px solid transparent;
-
-      i {
-        width: 20px;
-        margin-right: 15px;
-        font-size: 18px;
-      }
-
-      &:hover,
-      &.active {
-        background: $sidebar-hover;
-        color: $white;
-        border-left-color: $accent-blue;
-      }
-
-      &.text-danger:hover {
-        border-left-color: $primary-color;
-        color: #ff7675;
-      }
-    }
-  }
-
-  &__divider {
-    height: 1px;
-    background: rgba(255, 255, 255, 0.1);
-    margin: 15px 25px;
-  }
-}
-
 .main-content {
   flex-grow: 1;
   padding: 40px;
@@ -77,6 +14,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    gap: 30px;
 
     h2 {
       font-size: 30px;
@@ -98,166 +36,19 @@
   }
 }
 
-// ==========================================================================
-// 4. COMPONENTS
-// ==========================================================================
-
-// Grid cho các thẻ thống kê
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 25px;
-  margin-bottom: 40px;
-}
-
-.card-counter {
-  position: relative;
-  padding: 30px 20px;
-  border-radius: 12px;
-  color: $white;
-  overflow: hidden;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s;
-
-  &:hover {
-    transform: translateY(-5px);
-  }
-
-  i {
-    position: absolute;
-    right: -10px;
-    bottom: -10px;
-    font-size: 5rem;
-    opacity: 0.15;
-  }
-
-  &__info {
-    h3 {
-      font-size: 28px;
-      margin-bottom: 5px;
-    }
-    p {
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      opacity: 0.8;
-    }
-  }
-
-  &.bg-revenue {
-    background: linear-gradient(135deg, #007bff, #0056b3);
-  }
-  &.bg-orders {
-    background: linear-gradient(135deg, #6610f2, #4b0db8);
-  }
-  &.bg-customers {
-    background: linear-gradient(135deg, #28a745, #1e7e34);
-  }
-  &.bg-products {
-    background: linear-gradient(135deg, #fd7e14, #d3650b);
-  }
-}
-
-// Table Styles
-.table-container {
-  background: $white;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-
-  h5 {
-    font-size: 18px;
-    margin-bottom: 25px;
-    color: #444;
-  }
-
-  .table {
-    width: 100%;
-    border-collapse: collapse;
-
-    thead th {
-      text-align: left;
-      padding: 15px;
-      border-bottom: 2px solid $border-color;
-      color: #888;
-      font-size: 13px;
-      text-transform: uppercase;
-    }
-
-    tbody td {
-      padding: 8px;
-      border-bottom: 1px solid $border-color;
-      font-size: 15px;
-    }
-  }
-}
-
-// Badges & Buttons
-.status-badge {
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-
-  &.badge-warning {
-    background: #fff9db;
-    color: #f08c00;
-  }
-  &.badge-success {
-    background: #ebfbee;
-    color: #40c057;
-  }
-}
-
-.action-link {
-  color: $accent-blue;
-  text-decoration: none;
-  font-weight: 600;
-  margin-inline: 10px;
-  &:hover {
-    text-decoration: underline;
-  }
-}
-.btn-primary {
-  background-color: $primary-color;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: 0.3s;
-
-  &:hover {
-    background-color: $primary-hover;
-    box-shadow: 0 4px 12px rgba(208, 2, 28, 0.2);
-  }
-}
-.action-link i {
-  font-size: 20px;
-}
-
-.text-danger {
-  color: #e74c3c !important;
-}
-
-.text-warning {
-  color: #f1c40f;
-}
-/* Thêm vào file dashboard.css hoặc thẻ <style> */
 .product-img-wrapper {
   width: 60px;
   height: 60px;
   border-radius: 4px;
   border: 1px solid #ddd;
-  overflow: hidden; /* Cắt bỏ phần ảnh dư thừa */
+  overflow: hidden; 
   background: #f0f0f0;
 }
 
 .product-img-wrapper img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Giúp ảnh luôn lấp đầy ô vuông mà không bị méo */
+  object-fit: cover; 
   object-position: center;
 }
 .search-form {
@@ -266,7 +57,7 @@
   border-radius: 10px;
 
   .auth-form__input {
-    padding: 8px 15px; // Nhỏ hơn input bình thường một chút
+    padding: 8px 15px; 
     min-width: 200px;
   }
 

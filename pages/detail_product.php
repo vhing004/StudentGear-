@@ -48,7 +48,7 @@ $current_price = ($discount_percent > 0)
             <a href="<?= BASE_URL ?>">Trang chủ</a> »
             <a href="<?= BASE_URL ?>tat-ca-san-pham.php">Sản phẩm</a> »
             <?php if (!empty($product['category_name'])): ?>
-                <a href="<?= BASE_URL ?>pages/category.php?category_id=<?= htmlspecialchars($product['category_id']) ?>">
+                <a href="<?= BASE_URL ?>pages/category.php?id=<?= htmlspecialchars($product['category_id']) ?>">
                     <?= htmlspecialchars($product['category_name']) ?>
                 </a> »
             <?php endif; ?>
