@@ -1,0 +1,47 @@
+.search-form {
+  background: #fff;
+  padding: 5px;
+  border-radius: 10px;
+
+  .auth-form__input {
+    padding: 8px 15px;
+    min-width: 200px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.action_link {
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.form-group-vnd {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.form-group-vnd input.input-vnd {
+  width: 100%;
+  padding-right: 40px !important;
+  box-sizing: border-box;
+}
+
+.form-group-vnd .currency-unit {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-weight: bold;
+  font-size: 14px;
+  pointer-events: none;
+}

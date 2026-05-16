@@ -22,17 +22,13 @@
 .badge-count {
   background-color: #e3f2fd;
   color: #0288d1;
-  padding: 3px 8px;
-  border-radius: 20px;
+  padding: 12px 30px;
+  border-radius: 8px;
   font-weight: bold;
   font-size: 13px;
 }
 
-/* CSS Thanh tìm kiếm chuẩn giao diện admin */
-.search-filter-wrapper {
-  margin-bottom: 20px;
-  background: #fff;
-  padding: 15px;
+.user {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
   max-width: 650px;
@@ -42,13 +38,11 @@
 .search-form {
   display: flex;
   gap: 10px;
-  width: 100%;
 }
 
 .search-input {
   flex: 1;
   padding: 8px 15px;
-  border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
   outline: none;

@@ -53,37 +53,6 @@ while ($cat = $categories->fetch_assoc()) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="shortcut icon" href="../../assets/images/admin.webp" type="image/x-icon">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/admin.css">
-    <style>
-        /* Khung bọc ô input tiền tệ */
-        .form-group-vnd {
-            position: relative;
-            display: block;
-            width: 100%;
-        }
-
-        /* Định dạng ô input tiền */
-        .form-group-vnd input.input-vnd {
-            width: 100%;
-            padding-right: 40px !important;
-            /* Tạo khoảng trống bên phải tránh đè chữ đ */
-            /* text-align: right; */
-            /* Căn phải số tiền để dễ đọc */
-            box-sizing: border-box;
-        }
-
-        /* Ký tự đơn vị tiền tệ cố định */
-        .form-group-vnd .currency-unit {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #999;
-            font-weight: bold;
-            font-size: 14px;
-            pointer-events: none;
-            /* Không cản trở hành vi click chuột vào input */
-        }
-    </style>
 </head>
 
 <body class="admin-body">
@@ -94,7 +63,7 @@ while ($cat = $categories->fetch_assoc()) {
             <header class="main-content__header">
                 <h2>Quản lý sản phẩm</h2>
                 <div class="header-actions" style="display: flex; gap: 15px;">
-                    <form method="GET" action="" class="search-form" style="display: flex; gap: 10px;">
+                    <form method="GET" action="" class="search-form">
                         <div class="auth-form__group" style="margin-bottom: 0;">
                             <input type="text" name="search" class="auth-form__input"
                                 placeholder="Tìm tên sản phẩm..."

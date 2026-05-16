@@ -51,30 +51,7 @@
   object-fit: cover; 
   object-position: center;
 }
-.search-form {
-  background: #fff;
-  padding: 5px;
-  border-radius: 10px;
 
-  .auth-form__input {
-    padding: 8px 15px; 
-    min-width: 200px;
-  }
-
-  .btn-primary,
-  .btn-secondary {
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-.action_link {
-  cursor: pointer;
-  border: none;
-  outline: none;
-}
 // Responsive
 @media (max-width: 992px) {
   .admin-wrapper {

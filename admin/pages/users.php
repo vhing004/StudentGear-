@@ -52,21 +52,21 @@ $res_users = $conn->query($sql_users);
         <main class="main-content">
             <header class="main-content__header">
                 <h2>Quản lý khách hàng</h2>
-                <section class="search-filter-wrapper">
-                    <form method="GET" action="" class="search-form">
-                        <input type="text" name="search" class="search-input"
-                            placeholder="Nhập tên, email, sđt hoặc tài khoản..."
-                            value="<?= htmlspecialchars($search) ?>">
-                        <button type="submit" class="btn-primary" style="padding: 8px 15px;">
-                            <i class="fas fa-search"></i> Tìm kiếm
-                        </button>
-                        <?php if (!empty($search)): ?>
-                            <a href="users.php" class="btn-secondary" style="padding: 8px 15px; text-decoration: none; display: inline-flex; align-items: center; border-radius: 4px;">
-                                Xóa bộ lọc
-                            </a>
-                        <?php endif; ?>
-                    </form>
-                </section>
+                <!-- <section class="search-filter-wrapper"> -->
+                <form method="GET" action="" class="search-form user">
+                    <input type="text" name="search" class="search-input"
+                        placeholder="Nhập tên, email, sđt hoặc tài khoản..."
+                        value="<?= htmlspecialchars($search) ?>">
+                    <button type="submit" class="btn-primary" style="padding: 8px 15px;">
+                        <i class="fas fa-search"></i> Tìm kiếm
+                    </button>
+                    <?php if (!empty($search)): ?>
+                        <a href="users.php" class="btn-secondary" style="padding: 8px 15px; text-decoration: none; display: inline-flex; align-items: center; border-radius: 4px;">
+                            Xóa bộ lọc
+                        </a>
+                    <?php endif; ?>
+                </form>
+                <!-- </section> -->
                 <span class="badge-count">Tổng khách hàng: <?= $res_users->num_rows ?></span>
             </header>
 
