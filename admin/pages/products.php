@@ -53,6 +53,37 @@ while ($cat = $categories->fetch_assoc()) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="shortcut icon" href="../../assets/images/admin.webp" type="image/x-icon">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/admin.css">
+    <style>
+        /* Khung bọc ô input tiền tệ */
+        .form-group-vnd {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+
+        /* Định dạng ô input tiền */
+        .form-group-vnd input.input-vnd {
+            width: 100%;
+            padding-right: 40px !important;
+            /* Tạo khoảng trống bên phải tránh đè chữ đ */
+            /* text-align: right; */
+            /* Căn phải số tiền để dễ đọc */
+            box-sizing: border-box;
+        }
+
+        /* Ký tự đơn vị tiền tệ cố định */
+        .form-group-vnd .currency-unit {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-weight: bold;
+            font-size: 14px;
+            pointer-events: none;
+            /* Không cản trở hành vi click chuột vào input */
+        }
+    </style>
 </head>
 
 <body class="admin-body">
@@ -195,12 +226,19 @@ while ($cat = $categories->fetch_assoc()) {
 
                 <div class="grid-2-col">
                     <div class="auth-form__group">
-                        <label>Giá nhập (Cost)</label>
-                        <input type="number" name="cost_price" class="auth-form__input" required>
+                        <label>Giá vốn nhập hàng (Cost Price)</label>
+                        <div class="form-group-vnd">
+                            <input type="text" name="cost_price" class="auth-form__input input-vnd" placeholder="0" autocomplete="off">
+                            <span class="currency-unit">đ</span>
+                        </div>
                     </div>
+
                     <div class="auth-form__group">
-                        <label>Giá bán (Price)</label>
-                        <input type="number" name="price" class="auth-form__input" required>
+                        <label>Giá bán ra (Price)</label>
+                        <div class="form-group-vnd">
+                            <input type="text" name="price" class="auth-form__input input-vnd" required placeholder="0" autocomplete="off">
+                            <span class="currency-unit">đ</span>
+                        </div>
                     </div>
                 </div>
 
@@ -269,12 +307,19 @@ while ($cat = $categories->fetch_assoc()) {
 
                 <div class="grid-2-col">
                     <div class="auth-form__group">
-                        <label>Giá nhập (VNĐ)</label>
-                        <input type="number" name="cost_price" id="edit_prod_cost" class="auth-form__input" required>
+                        <label>Giá vốn nhập hàng:</label>
+                        <div class="form-group-vnd">
+                            <input type="text" name="cost_price" id="edit_prod_cost" class="auth-form__input input-vnd">
+                            <span class="currency-unit">đ</span>
+                        </div>
                     </div>
+
                     <div class="auth-form__group">
-                        <label>Giá bán (VNĐ)</label>
-                        <input type="number" name="price" id="edit_prod_price" class="auth-form__input" required>
+                        <label>Giá bán ra:</label>
+                        <div class="form-group-vnd">
+                            <input type="text" name="price" id="edit_prod_price" class="auth-form__input input-vnd" required>
+                            <span class="currency-unit">đ</span>
+                        </div>
                     </div>
                 </div>
 
@@ -364,7 +409,7 @@ while ($cat = $categories->fetch_assoc()) {
 
 </html>
 <script>
-    // Hàm mở Modal
+    // FUNNTION OPEN MODAL
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
         modal.classList.remove('is-closing');
@@ -372,7 +417,7 @@ while ($cat = $categories->fetch_assoc()) {
         document.body.style.overflow = 'hidden';
     }
 
-    // Hàm đóng Modal kèm hiệu ứng
+    //  FUNNTION CLOSE MODAL WITH ANIMATION
     function closeModal(modalId) {
         const modal = document.getElementById(modalId);
 
@@ -387,7 +432,7 @@ while ($cat = $categories->fetch_assoc()) {
         }, 300);
     }
 
-    // Cập nhật lại window.onclick để cũng có hiệu ứng khi click ra ngoài
+    // CLICK OUT
     window.onclick = function(event) {
         if (event.target.classList.contains('modal')) {
             const modalId = event.target.id;
@@ -395,7 +440,7 @@ while ($cat = $categories->fetch_assoc()) {
         }
     }
 
-    // Hàm xem trước ảnh khi chọn file
+    // PREVIEW IMAGE CHOOSE FILE
     function previewImage(input) {
         const container = document.getElementById('image_preview_container');
         const preview = document.getElementById('add_preview');
@@ -427,9 +472,63 @@ while ($cat = $categories->fetch_assoc()) {
         document.getElementById('image_preview_box').style.display = 'none';
     }
 
+    // FORMAT VND
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hàm định dạng chuỗi số hoặc số thực thành định dạng VND chuẩn
+        function formatVNDString(value) {
+            // Nếu giá trị là số (từ DB truyền ra), ép về chuỗi trước
+            if (typeof value === 'number') {
+                value = Math.floor(value).toString();
+            }
 
+            // Bóc tách bỏ phần thập phân .00 nếu có từ dữ liệu DECIMAL trước khi lọc
+            if (value.includes('.')) {
+                let parts = value.split('.');
+                // Nếu phần sau dấu chấm là đuôi số thập phân của DB (nhỏ hơn hoặc bằng 2 chữ số)
+                if (parts[1] && parts[1].length <= 2) {
+                    value = parts[0]; // Chỉ giữ lại phần số nguyên
+                }
+            }
 
+            let num = value.replace(/\D/g, ''); // Loại bỏ toàn bộ ký tự chữ, giữ lại số sạch
 
+            if (num) {
+                // Ép về số nguyên hệ cơ số 10 để loại bỏ hoàn toàn số 0 thừa ở đầu
+                return new Intl.NumberFormat('vi-VN').format(parseInt(num, 10));
+            }
+            return '';
+        }
+
+        // Lắng nghe gõ phím trực tiếp trên các ô input
+        const inputVndList = document.querySelectorAll('.input-vnd');
+        inputVndList.forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = formatVNDString(this.value);
+            });
+        });
+
+        // Xử lý bóc tách dấu chấm TRƯỚC KHI SUBMIT gửi lên PHP
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function() {
+                const vndsInForm = form.querySelectorAll('.input-vnd');
+                vndsInForm.forEach(input => {
+                    // Biến đổi ngược "1.200.000" thành số thuần túy "1200000" để lưu vào DB
+                    input.value = input.value.replace(/\./g, '');
+                });
+            });
+        });
+
+        // Hàm global bổ trợ khi đổ dữ liệu vào ô Edit Modal
+        window.formatInputVNDOnEdit = function(inputSelector) {
+            const inputField = document.querySelector(inputSelector);
+            if (inputField && inputField.value) {
+                inputField.value = formatVNDString(inputField.value);
+            }
+        };
+    });
+
+    // OPEN EDIT MODAL
     function openEditProdModal(product) {
         // 1. Điền các trường văn bản và số
         document.getElementById('edit_prod_id').value = product.id;
@@ -445,6 +544,19 @@ while ($cat = $categories->fetch_assoc()) {
         document.getElementById('edit_prod_featured').checked = (parseInt(product.is_featured) === 1);
         document.getElementById('edit_prod_new').checked = (parseInt(product.is_new) === 1);
         document.getElementById('edit_prod_active').checked = (parseInt(product.is_active) === 1);
+
+        // document.getElementById('edit_prod_id').value = product.id;
+        // document.getElementById('edit_prod_name').value = product.name;
+
+        // 2. Gán giá trị số thô từ Database vào 2 ô nhập tiền
+        // document.getElementById('edit_prod_price').value = product.price;
+        // document.getElementById('edit_prod_cost_price').value = product.cost_price ? product.cost_price : '0';
+
+        // 3. KÍCH HOẠT ĐỊNH DẠNG SỐ: Biến giá trị thô thành dạng "1.500.000" trên giao diện
+        if (typeof window.formatInputVNDOnEdit === 'function') {
+            window.formatInputVNDOnEdit('#edit_prod_price');
+            window.formatInputVNDOnEdit('#edit_prod_cost');
+        }
 
         // 3. Xử lý hiển thị ảnh Preview trong Modal
         const previewImg = document.getElementById('edit_prod_preview');
