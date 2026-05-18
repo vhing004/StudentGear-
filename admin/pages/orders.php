@@ -329,9 +329,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             </form>
         </div>
     </div>
-    <script src="../../assets/js/modal_admin.js"></script>
-    <script src="../../assets/js/order_admin.js"></script>
 
 </body>
 
 </html>
+<script src="../../assets/js/modal_admin.js"></script>
+<script src="../../assets/js/order_admin.js"></script>
