@@ -52,7 +52,6 @@ $res_users = $conn->query($sql_users);
         <main class="main-content">
             <header class="main-content__header">
                 <h2>Quản lý khách hàng</h2>
-                <!-- <section class="search-filter-wrapper"> -->
                 <form method="GET" action="" class="search-form user">
                     <input type="text" name="search" class="search-input"
                         placeholder="Nhập tên, email, sđt hoặc tài khoản..."
@@ -66,7 +65,6 @@ $res_users = $conn->query($sql_users);
                         </a>
                     <?php endif; ?>
                 </form>
-                <!-- </section> -->
                 <span class="badge-count">Tổng khách hàng: <?= $res_users->num_rows ?></span>
             </header>
 
