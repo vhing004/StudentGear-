@@ -16,6 +16,9 @@ if (isset($_SESSION['role']) && in_array($_SESSION['role'], ['admin', 'moderator
 $sql_categories = "SELECT * FROM categories WHERE is_active = 1 LIMIT 8";
 $res_categories = $conn->query($sql_categories);
 
+// Lấy giá trị search từ URL nếu có
+$search_value = isset($_GET['search']) ? htmlspecialchars(trim($_GET['search'])) : '';
+
 // 2. Tính tổng số lượng sản phẩm trong giỏ hàng của người dùng hiện tại
 $cart = 0;
 if (isset($_SESSION['user_id'])) {
@@ -50,7 +53,7 @@ if (isset($_SESSION['user_id'])) {
                     </a>
 
                     <form action="<?php echo BASE_URL; ?>pages/category.php" class="header_search" method="GET">
-                        <input type="text" name="search" placeholder="Tìm kiếm sản phẩm..." required />
+                        <input type="text" name="search" value="<?php echo $search_value; ?>" placeholder="Tìm kiếm sản phẩm..." required />
                         <button class="header_search-btn">
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </button>

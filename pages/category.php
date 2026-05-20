@@ -7,6 +7,7 @@ $cat_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $min_price = isset($_GET['min']) ? intval($_GET['min']) : 0;
 $max_price = isset($_GET['max']) ? intval($_GET['max']) : 100000000;
 $sort = isset($_GET['sort']) ? $_GET['sort'] : 'default';
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
 // 2. Lấy thông tin danh mục hiện tại để làm Breadcrumb và Tiêu đề[cite: 2]
 $current_cat = null;
@@ -31,6 +32,13 @@ if ($cat_id > 0) {
 } elseif (isset($_GET['feature']) && $_GET['feature'] === 'true') {
     $sql_products .= " AND is_featured = 1";
 }
+
+// Thêm điều kiện tìm kiếm
+if (!empty($search)) {
+    $search_escaped = $conn->real_escape_string($search);
+    $sql_products .= " AND (name LIKE '%$search_escaped%' OR description LIKE '%$search_escaped%')";
+}
+
 $sql_products .= " AND price BETWEEN $min_price AND $max_price";
 
 // Sắp xếp theo lựa chọn[cite: 1]
@@ -54,7 +62,15 @@ $res_products = $conn->query($sql_products);
         <div class="category_breadcrumb">
             <a href="<?php echo BASE_URL; ?>index.php">Trang chủ</a> »
             <a href="#">Sản phẩm</a> »
-            <span><?php echo $current_cat['name'] ?? 'Sản phẩm nổi bật'; ?></span>
+            <span>
+                <?php 
+                    if (!empty($search)) {
+                        echo "Kết quả tìm kiếm: <strong>" . htmlspecialchars($search) . "</strong>";
+                    } else {
+                        echo $current_cat['name'] ?? 'Sản phẩm nổi bật';
+                    }
+                ?>
+            </span>
         </div>
         <!-- Cụm hiển thị số lượng và Sắp xếp bên phải -->
         <div class="category-main_filter">
@@ -63,9 +79,9 @@ $res_products = $conn->query($sql_products);
             </span>
 
             <select onchange="location = this.value;" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
-                <option value="category.php?id=<?= $cat_id ?>&sort=default" <?= $sort == 'default' ? 'selected' : '' ?>>Thứ tự mặc định</option>
-                <option value="category.php?id=<?= $cat_id ?>&sort=price_asc" <?= $sort == 'price_asc' ? 'selected' : '' ?>>Giá thấp đến cao</option>
-                <option value="category.php?id=<?= $cat_id ?>&sort=price_desc" <?= $sort == 'price_desc' ? 'selected' : '' ?>>Giá cao đến thấp</option>
+                <option value="category.php?id=<?= $cat_id ?>&sort=default<?= !empty($search) ? '&search=' . urlencode($search) : '' ?>" <?= $sort == 'default' ? 'selected' : '' ?>>Thứ tự mặc định</option>
+                <option value="category.php?id=<?= $cat_id ?>&sort=price_asc<?= !empty($search) ? '&search=' . urlencode($search) : '' ?>" <?= $sort == 'price_asc' ? 'selected' : '' ?>>Giá thấp đến cao</option>
+                <option value="category.php?id=<?= $cat_id ?>&sort=price_desc<?= !empty($search) ? '&search=' . urlencode($search) : '' ?>" <?= $sort == 'price_desc' ? 'selected' : '' ?>>Giá cao đến thấp</option>
             </select>
         </div>
     </div>
@@ -80,7 +96,7 @@ $res_products = $conn->query($sql_products);
                 while ($m = $res_menu->fetch_assoc()):
                 ?>
                     <li style="padding: 8px 0; border-bottom: 1px solid #eee;">
-                        <a href="category.php?id=<?= $m['id'] ?>" style="text-decoration: none; color: <?= ($cat_id == $m['id']) ? '#d0021c' : '#333' ?>;">
+                        <a href="category.php?id=<?= $m['id'] ?><?= !empty($search) ? '&search=' . urlencode($search) : '' ?>" style="text-decoration: none; color: <?= ($cat_id == $m['id']) ? '#d0021c' : '#333' ?>;">
                             <i class="fa-solid fa-chevron-right" style="font-size: 1rem;"></i> <?= htmlspecialchars($m['name']) ?>
                         </a>
                     </li>
@@ -90,6 +106,9 @@ $res_products = $conn->query($sql_products);
             <h3 style="font-size: 1.6rem; margin-top: 30px; margin-bottom: 15px;">LỌC THEO GIÁ</h3>
             <form action="category.php" method="GET">
                 <input type="hidden" name="id" value="<?= $cat_id ?>">
+                <?php if (!empty($search)): ?>
+                    <input type="hidden" name="search" value="<?= htmlspecialchars($search) ?>">
+                <?php endif; ?>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <input type="number" name="min" value="<?= $min_price ?>" placeholder="Giá từ..." style="padding: 5px;">
                     <input type="number" name="max" value="<?= $max_price ?>" placeholder="Đến..." style="padding: 5px;">
