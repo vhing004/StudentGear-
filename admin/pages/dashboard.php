@@ -185,7 +185,7 @@ $recent_orders = $conn->query($sql_recent_orders);
             <div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px;">
 
                 <div class="chart-item" style="border: 1px solid #f1f5f9; padding: 15px; border-radius: 6px;">
-                    <p style="margin: 0 0 10px 0; font-weight: 600; color: #475569; font-size: 14px;">Xu hướng doanh thu (đơn hoàn thành)</p>
+                    <p style="margin: 0 0 10px 0; font-weight: 600; color: #475569; font-size: 14px;">Doanh thu tháng</p>
                     <div style="position: relative; height: 280px; width: 100%;">
                         <canvas id="yearlyRevenueChart"></canvas>
                     </div>
@@ -267,7 +267,7 @@ $recent_orders = $conn->query($sql_recent_orders);
         <section class="table-container" style="margin-top: 30px;">
             <div class="table-header">
                 <h5>Đơn đặt hàng gần đây</h5>
-                <a href="orders.php" class="view-all">Xem tất cả</a>
+                <a href="./pages/orders.php" class="view-all">Xem tất cả</a>
             </div>
             <table class="table">
                 <thead>

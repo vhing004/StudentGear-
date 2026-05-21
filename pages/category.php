@@ -2,21 +2,40 @@
 // require_once 'config/db.php';
 include '../includes/header.php';
 
-// 1. Lấy ID danh mục từ URL (ví dụ: category.php?id=1)
+// 1. Lấy tham số bộ lọc từ URL
 $cat_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-$min_price = isset($_GET['min']) ? intval($_GET['min']) : 0;
-$max_price = isset($_GET['max']) ? intval($_GET['max']) : 100000000;
 $sort = isset($_GET['sort']) ? $_GET['sort'] : 'default';
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-// 2. Lấy thông tin danh mục hiện tại để làm Breadcrumb và Tiêu đề[cite: 2]
+// =========================================================================
+// [BỔ SUNG LOGIC]: TỰ ĐỘNG TÍNH MỐC GIÁ CAO NHẤT ĐỘNG THEO TỪNG DANH MỤC
+// =========================================================================
+$sql_max = "SELECT MAX(price) as max_p FROM products WHERE is_active = 1";
+if ($cat_id > 0) {
+    $sql_max .= " AND category_id = $cat_id";
+}
+$res_max = $conn->query($sql_max)->fetch_assoc();
+$db_max = isset($res_max['max_p']) ? (float)$res_max['max_p'] : 10000000; // Mặc định 10 triệu nếu trống
+
+// Làm tròn lên mốc triệu gần nhất để thanh trượt hiển thị đẹp mắt (Ví dụ: 9.5tr thành 10tr)
+$ceil_price = ceil($db_max / 1000000) * 1000000;
+if ($ceil_price <= 0) {
+    $ceil_price = 1000000;
+}
+
+// Tiếp nhận giá trị lọc người dùng kéo chọn (Nếu chưa kéo thì mặc định lấy kịch khung Max)
+$min_price = 0; // Luôn cố định từ 0đ cho bộ lọc thanh trượt đơn
+$max_price = isset($_GET['max']) ? intval($_GET['max']) : $ceil_price;
+// =========================================================================
+
+// 2. Lấy thông tin danh mục hiện tại để làm Breadcrumb và Tiêu đề
 $current_cat = null;
 if ($cat_id > 0) {
     $res_cat = $conn->query("SELECT * FROM categories WHERE id = $cat_id");
     $current_cat = $res_cat->fetch_assoc();
 }
 
-// 2. Lấy thông tin danh mục hiện tại để hiển thị tiêu đề[cite: 2]
+// Lấy thông tin danh mục hiện tại để hiển thị tiêu đề
 $current_cat_name = "Tất cả sản phẩm";
 if ($cat_id > 0) {
     $res_cat = $conn->query("SELECT name FROM categories WHERE id = $cat_id");
@@ -25,7 +44,7 @@ if ($cat_id > 0) {
     }
 }
 
-// 3. Truy vấn LẤY TẤT CẢ sản phẩm (Không dùng LIMIT)
+// 3. Truy vấn danh sách sản phẩm theo bộ lọc
 $sql_products = "SELECT * FROM products WHERE is_active = 1";
 if ($cat_id > 0) {
     $sql_products .= " AND category_id = $cat_id";
@@ -39,9 +58,10 @@ if (!empty($search)) {
     $sql_products .= " AND (name LIKE '%$search_escaped%' OR description LIKE '%$search_escaped%')";
 }
 
+// Áp dụng khoảng giá lọc
 $sql_products .= " AND price BETWEEN $min_price AND $max_price";
 
-// Sắp xếp theo lựa chọn[cite: 1]
+// Sắp xếp theo lựa chọn
 switch ($sort) {
     case 'price_asc':
         $sql_products .= " ORDER BY price ASC";
@@ -57,24 +77,74 @@ switch ($sort) {
 $res_products = $conn->query($sql_products);
 ?>
 
+<style>
+    .single-slider-container {
+        padding: 10px 5px;
+        font-family: sans-serif;
+    }
+
+    .single-slider-container input[type="range"] {
+        width: 100%;
+        height: 6px;
+        background: #e2e8f0;
+        border-radius: 3px;
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    /* Tùy biến nút kéo tròn của trình duyệt Webkit (Chrome, Safari, Edge) */
+    .single-slider-container input[type="range"]::-webkit-slider-thumb {
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid #d0021c;
+        cursor: pointer;
+        -webkit-appearance: none;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Tùy biến nút kéo tròn cho trình duyệt Firefox */
+    .single-slider-container input[type="range"]::-moz-range-thumb {
+        height: 16px;
+        width: 16px;
+        border: 2px solid #d0021c;
+        border-radius: 50%;
+        background: #fff;
+        cursor: pointer;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .price-display-label {
+        font-size: 14px;
+        color: #475569;
+        margin-bottom: 15px;
+        font-weight: 600;
+        text-align: center;
+    }
+</style>
+
 <main class="container category">
     <div class="category_head">
         <div class="category_breadcrumb">
             <a href="<?php echo BASE_URL; ?>index.php">Trang chủ</a> »
             <a href="#">Sản phẩm</a> »
             <span>
-                <?php 
-                    if (!empty($search)) {
-                        echo "Kết quả tìm kiếm: <strong>" . htmlspecialchars($search) . "</strong>";
-                    } else {
-                        echo $current_cat['name'] ?? 'Sản phẩm nổi bật';
-                    }
+                <?php
+                if (!empty($search)) {
+                    echo "Kết quả tìm kiếm: <strong>" . htmlspecialchars($search) . "</strong>";
+                } else {
+                    echo htmlspecialchars($current_cat['name'] ?? 'Sản phẩm nổi bật');
+                }
                 ?>
             </span>
         </div>
-        <!-- Cụm hiển thị số lượng và Sắp xếp bên phải -->
+
         <div class="category-main_filter">
-            <span style=" font-size: 1.4rem; color: #666;">
+            <span style="font-size: 1.4rem; color: #666;">
                 Hiện đang có <strong><?php echo $res_products->num_rows; ?></strong> sản phẩm
             </span>
 
@@ -85,9 +155,8 @@ $res_products = $conn->query($sql_products);
             </select>
         </div>
     </div>
-    <div class="category-layout" style="display: flex; gap: 20px;">
 
-        <!-- SIDEBAR: Bộ lọc bên trái (Giống image_4a4f9a.jpg) -->
+    <div class="category-layout" style="display: flex; gap: 20px;">
         <aside class="category-sidebar" style="flex: 1; max-width: 250px;">
             <h3 style="font-size: 1.6rem; margin-bottom: 15px;">DANH MỤC SẢN PHẨM</h3>
             <ul style="list-style: none; padding: 0;">
@@ -106,34 +175,41 @@ $res_products = $conn->query($sql_products);
             <h3 style="font-size: 1.6rem; margin-top: 30px; margin-bottom: 15px;">LỌC THEO GIÁ</h3>
             <form action="category.php" method="GET">
                 <input type="hidden" name="id" value="<?= $cat_id ?>">
+                <input type="hidden" name="min" value="0">
                 <?php if (!empty($search)): ?>
                     <input type="hidden" name="search" value="<?= htmlspecialchars($search) ?>">
                 <?php endif; ?>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <input type="number" name="min" value="<?= $min_price ?>" placeholder="Giá từ..." style="padding: 5px;">
-                    <input type="number" name="max" value="<?= $max_price ?>" placeholder="Đến..." style="padding: 5px;">
-                    <button type="submit" class="btn-filter" style="background: #d0021c; color: #fff; border: none; padding: 8px; cursor: pointer;">Lọc sản phẩm</button>
+
+                <div class="single-slider-container">
+                    <input type="range" id="single_price_range"
+                        min="0"
+                        max="<?= $ceil_price ?>"
+                        value="<?= $max_price ?>"
+                        step="50000">
+
+                    <div class="price-display-label">
+                        Giá dưới: <span id="max_price_text" style="color: #d0021c; font-size: 16px; font-weight: bold;">0đ</span>
+                    </div>
+
+                    <input type="hidden" name="max" id="hidden_input_max" value="<?= $max_price ?>">
+
+                    <button type="submit" class="btn-filter" style="width: 100%; background: #d0021c; color: #fff; border: none; padding: 10px; cursor: pointer; font-weight: bold; border-radius: 4px;">
+                        <i class="fas fa-filter" style="font-size: 11px; margin-right: 4px;"></i> Lọc sản phẩm
+                    </button>
                 </div>
             </form>
         </aside>
 
-        <!-- CONTENT: Hiển thị danh sách sản phẩm (Tái sử dụng class của bạn) -->
         <section class="category-main" style="flex: 3;">
             <div class="hot_list" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
                 <?php if ($res_products->num_rows > 0): ?>
                     <?php while ($row = $res_products->fetch_assoc()):
-                        // 1. Giá gốc từ database (đóng vai trò là giá cũ/giá niêm yết)
                         $old_price = (float)$row['price'];
-
-                        // 2. Phần trăm giảm giá
                         $discount_percent = (float)$row['discount_percent'];
-
-                        // 3. Tính giá hiện tại sau khi áp dụng giảm giá (nếu có)
                         $current_price = ($discount_percent > 0)
                             ? $old_price * (1 - ($discount_percent / 100))
                             : $old_price;
                     ?>
-                        <!-- TÁI SỬ DỤNG HOÀN TOÀN ARTICLE CỦA BẠN[cite: 1] -->
                         <article class="hot_list__item" style="border: 1px solid #f1f1f1;">
                             <div class="hot_list__media">
                                 <a href="detail_product.php?product_id=<?php echo $row['id']; ?>">
@@ -174,3 +250,33 @@ $res_products = $conn->query($sql_products);
 </main>
 
 <?php include '../includes/footer.php'; ?>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const priceRange = document.getElementById("single_price_range");
+        const maxPriceText = document.getElementById("max_price_text");
+        const hiddenMax = document.getElementById("hidden_input_max");
+
+        // Hàm chuyển đổi chữ số thành định dạng tiền Việt Nam (Ví dụ: 10.000.000đ)
+        function formatVNCurrency(value) {
+            return new Intl.NumberFormat('vi-VN').format(value) + 'đ';
+        }
+
+        function updateSingleSliderOutput() {
+            const currentVal = parseInt(priceRange.value);
+
+            // 1. Cập nhật nhãn chữ số tiền hiển thị thời gian thực cho khách xem
+            maxPriceText.innerText = formatVNCurrency(currentVal);
+
+            // 2. Gán đè giá trị vào input hidden để gửi dữ liệu mượt mà lên URL qua phương thức GET
+            hiddenMax.value = currentVal;
+        }
+
+        // Lắng nghe sự kiện người dùng di chuyển chuột kéo thanh trượt
+        if (priceRange) {
+            priceRange.addEventListener("input", updateSingleSliderOutput);
+            // Khởi động hàm lần đầu tiên khi tải lại trang nhằm giữ đúng mốc tiền cũ đã chọn trên URL
+            updateSingleSliderOutput();
+        }
+    });
+</script>
