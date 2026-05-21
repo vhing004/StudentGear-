@@ -75,57 +75,10 @@ switch ($sort) {
 }
 
 $res_products = $conn->query($sql_products);
+
+// Tạo chuỗi truy vấn tìm kiếm dùng lại cho các URL
+$search_param = !empty($search) ? '&search=' . urlencode($search) : '';
 ?>
-
-<style>
-    .single-slider-container {
-        padding: 10px 5px;
-        font-family: sans-serif;
-    }
-
-    .single-slider-container input[type="range"] {
-        width: 100%;
-        height: 6px;
-        background: #e2e8f0;
-        border-radius: 3px;
-        outline: none;
-        -webkit-appearance: none;
-        appearance: none;
-        margin-bottom: 15px;
-        display: block;
-    }
-
-    /* Tùy biến nút kéo tròn của trình duyệt Webkit (Chrome, Safari, Edge) */
-    .single-slider-container input[type="range"]::-webkit-slider-thumb {
-        height: 16px;
-        width: 16px;
-        border-radius: 50%;
-        background: #fff;
-        border: 2px solid #d0021c;
-        cursor: pointer;
-        -webkit-appearance: none;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Tùy biến nút kéo tròn cho trình duyệt Firefox */
-    .single-slider-container input[type="range"]::-moz-range-thumb {
-        height: 16px;
-        width: 16px;
-        border: 2px solid #d0021c;
-        border-radius: 50%;
-        background: #fff;
-        cursor: pointer;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    .price-display-label {
-        font-size: 14px;
-        color: #475569;
-        margin-bottom: 15px;
-        font-weight: 600;
-        text-align: center;
-    }
-</style>
 
 <main class="container category">
     <div class="category_head">
@@ -149,9 +102,9 @@ $res_products = $conn->query($sql_products);
             </span>
 
             <select onchange="location = this.value;" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
-                <option value="category.php?id=<?= $cat_id ?>&sort=default<?= !empty($search) ? '&search=' . urlencode($search) : '' ?>" <?= $sort == 'default' ? 'selected' : '' ?>>Thứ tự mặc định</option>
-                <option value="category.php?id=<?= $cat_id ?>&sort=price_asc<?= !empty($search) ? '&search=' . urlencode($search) : '' ?>" <?= $sort == 'price_asc' ? 'selected' : '' ?>>Giá thấp đến cao</option>
-                <option value="category.php?id=<?= $cat_id ?>&sort=price_desc<?= !empty($search) ? '&search=' . urlencode($search) : '' ?>" <?= $sort == 'price_desc' ? 'selected' : '' ?>>Giá cao đến thấp</option>
+                <option value="category.php?id=<?= $cat_id ?>&sort=default&max=<?= $max_price . $search_param ?>" <?= $sort == 'default' ? 'selected' : '' ?>>Thứ tự mặc định</option>
+                <option value="category.php?id=<?= $cat_id ?>&sort=price_asc&max=<?= $max_price . $search_param ?>" <?= $sort == 'price_asc' ? 'selected' : '' ?>>Giá thấp đến cao</option>
+                <option value="category.php?id=<?= $cat_id ?>&sort=price_desc&max=<?= $max_price . $search_param ?>" <?= $sort == 'price_desc' ? 'selected' : '' ?>>Giá cao đến thấp</option>
             </select>
         </div>
     </div>
@@ -165,7 +118,7 @@ $res_products = $conn->query($sql_products);
                 while ($m = $res_menu->fetch_assoc()):
                 ?>
                     <li style="padding: 8px 0; border-bottom: 1px solid #eee;">
-                        <a href="category.php?id=<?= $m['id'] ?><?= !empty($search) ? '&search=' . urlencode($search) : '' ?>" style="text-decoration: none; color: <?= ($cat_id == $m['id']) ? '#d0021c' : '#333' ?>;">
+                        <a href="category.php?id=<?= $m['id'] ?>&sort=<?= $sort ?>&max=<?= $max_price . $search_param ?>" style="text-decoration: none; color: <?= ($cat_id == $m['id']) ? '#d0021c' : '#333' ?>;">
                             <i class="fa-solid fa-chevron-right" style="font-size: 1rem;"></i> <?= htmlspecialchars($m['name']) ?>
                         </a>
                     </li>
@@ -176,6 +129,7 @@ $res_products = $conn->query($sql_products);
             <form action="category.php" method="GET">
                 <input type="hidden" name="id" value="<?= $cat_id ?>">
                 <input type="hidden" name="min" value="0">
+                <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
                 <?php if (!empty($search)): ?>
                     <input type="hidden" name="search" value="<?= htmlspecialchars($search) ?>">
                 <?php endif; ?>
@@ -257,25 +211,18 @@ $res_products = $conn->query($sql_products);
         const maxPriceText = document.getElementById("max_price_text");
         const hiddenMax = document.getElementById("hidden_input_max");
 
-        // Hàm chuyển đổi chữ số thành định dạng tiền Việt Nam (Ví dụ: 10.000.000đ)
         function formatVNCurrency(value) {
             return new Intl.NumberFormat('vi-VN').format(value) + 'đ';
         }
 
         function updateSingleSliderOutput() {
             const currentVal = parseInt(priceRange.value);
-
-            // 1. Cập nhật nhãn chữ số tiền hiển thị thời gian thực cho khách xem
             maxPriceText.innerText = formatVNCurrency(currentVal);
-
-            // 2. Gán đè giá trị vào input hidden để gửi dữ liệu mượt mà lên URL qua phương thức GET
             hiddenMax.value = currentVal;
         }
 
-        // Lắng nghe sự kiện người dùng di chuyển chuột kéo thanh trượt
         if (priceRange) {
             priceRange.addEventListener("input", updateSingleSliderOutput);
-            // Khởi động hàm lần đầu tiên khi tải lại trang nhằm giữ đúng mốc tiền cũ đã chọn trên URL
             updateSingleSliderOutput();
         }
     });
