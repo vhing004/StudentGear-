@@ -296,6 +296,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         </div>
     </div>
 
+    <!-- EDIT MODAL -->
     <div id="editOrderModal" class="modal">
         <div class="modal__content">
             <h3>Cập nhật đơn hàng #<span id="display_order_code"></span></h3>
@@ -318,7 +319,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 
                 <div class="auth-form__group">
                     <label>Ghi chú thay đổi (Sẽ hiển thị cho khách hàng)</label>
-                    <textarea name="note" class="auth-form__input" rows="3"
+                    <textarea name="note" id="edit_order_note" class="auth-form__input" rows="3"
                         placeholder="Ví dụ: Đã xác nhận qua điện thoại, shipper đang lấy hàng..."></textarea>
                 </div>
 
