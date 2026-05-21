@@ -4,10 +4,8 @@
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-
   h5 {
     font-size: 18px;
-    margin-bottom: 25px;
     color: #444;
   }
 
@@ -28,6 +26,24 @@
       padding: 8px;
       border-bottom: 1px solid $border-color;
       font-size: 15px;
+    }
+  }
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  & a {
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    &:hover {
+      background-color: $primary-color;
+      color: #fff;
+      border-color: $primary-color;
     }
   }
 }
