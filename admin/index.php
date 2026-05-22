@@ -32,11 +32,9 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
         <?php
         include_once './includes/sidebar.php';
         include_once './pages/dashboard.php';
-
         ?>
-
     </div>
-
 </body>
+<script src="../assets/js/toast_admin.js"></script>
 
 </html>
