@@ -23,7 +23,7 @@ $old_info = null;
 $sql_recent = "SELECT shipping_name, shipping_phone, shipping_address 
                FROM orders 
                WHERE user_id = '$user_id' 
-               ORDER BY id DESC LIMIT 1"; // Sắp xếp theo ID giảm dần để lấy đơn mới nhất
+               ORDER BY id DESC LIMIT 1"; 
 $res_recent = $conn->query($sql_recent);
 
 if ($res_recent && $res_recent->num_rows > 0) {
