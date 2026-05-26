@@ -2,189 +2,276 @@
 session_start();
 require_once '../config/db.php';
 
-// Kiểm tra đăng nhập
 if (!isset($_SESSION['user_id'])) {
-    header("Location: ../auth/login.php");
+    header('Location: ../auth/login.php');
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: ../pages/history_order.php?msg=error');
+    exit();
+}
 
-    // Validate dữ liệu
-    if (
-        !isset($_POST['order_id']) ||
-        !isset($_POST['action_type']) ||
-        !isset($_POST['reason'])
-    ) {
-        header("Location: ../pages/history_order.php?msg=invalid_data");
+$user_id = $_SESSION['user_id'];
+
+$order_id = isset($_POST['order_id']) ? (int)$_POST['order_id'] : 0;
+$action_type = isset($_POST['action_type']) ? trim($_POST['action_type']) : '';
+$reason = isset($_POST['reason']) ? trim($_POST['reason']) : '';
+$description = isset($_POST['description']) ? trim($_POST['description']) : '';
+$refund_amount = isset($_POST['refund_amount']) ? (float)$_POST['refund_amount'] : 0;
+
+if ($order_id <= 0 || empty($action_type) || empty($reason)) {
+    header('Location: ../pages/history_order.php?msg=error');
+    exit();
+}
+
+if (!in_array($action_type, ['cancel', 'return'])) {
+    header('Location: ../pages/history_order.php?msg=error');
+    exit();
+}
+
+// =========================================
+// KIỂM TRA ĐƠN HÀNG
+// =========================================
+$stmt_order = $conn->prepare(" 
+    SELECT * 
+    FROM orders 
+    WHERE id = ? AND user_id = ?
+    LIMIT 1
+");
+
+$stmt_order->bind_param("ii", $order_id, $user_id);
+$stmt_order->execute();
+$result_order = $stmt_order->get_result();
+$order = $result_order->fetch_assoc();
+
+if (!$order) {
+    header('Location: ../pages/history_order.php?msg=error');
+    exit();
+}
+
+// =========================================
+// VALIDATE THEO LOẠI YÊU CẦU
+// =========================================
+if ($action_type === 'cancel' && $order['status'] !== 'pending') {
+    header('Location: ../pages/history_order.php?msg=error');
+    exit();
+}
+
+if ($action_type === 'return' && $order['status'] !== 'delivered') {
+    header('Location: ../pages/history_order.php?msg=error');
+    exit();
+}
+
+// =========================================
+// KIỂM TRA REQUEST ĐANG TỒN TẠI
+// =========================================
+$stmt_exist = $conn->prepare(" 
+    SELECT id, status
+    FROM order_requests
+    WHERE order_id = ?
+    AND request_type = ?
+    ORDER BY requested_at DESC
+    LIMIT 1
+");
+
+$stmt_exist->bind_param("is", $order_id, $action_type);
+$stmt_exist->execute();
+$result_exist = $stmt_exist->get_result();
+$exist_request = $result_exist->fetch_assoc();
+
+if ($exist_request && $exist_request['status'] === 'pending') {
+    header('Location: ../pages/history_order.php?msg=exist_request');
+    exit();
+}
+
+// =========================================
+// XỬ LÝ ẢNH MINH CHỨNG
+// =========================================
+$evidence_image = null;
+
+if (
+    isset($_FILES['evidence_image']) &&
+    $_FILES['evidence_image']['error'] === 0
+) {
+
+    $upload_dir = '../uploads/order_requests/';
+
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0777, true);
+    }
+
+    $file_tmp = $_FILES['evidence_image']['tmp_name'];
+    $file_name = time() . '_' . basename($_FILES['evidence_image']['name']);
+
+    $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+
+    $allowed_ext = ['jpg', 'jpeg', 'png', 'webp'];
+
+    if (!in_array($file_ext, $allowed_ext)) {
+        header('Location: ../pages/history_order.php?msg=error');
         exit();
     }
 
-    $order_id = (int) $_POST['order_id'];
-    $action_type = trim($_POST['action_type']);
-    $reason = trim($_POST['reason']);
-    $user_id = $_SESSION['user_id'];
+    $new_path = $upload_dir . $file_name;
 
-    // Validate action
-    $allowed_actions = ['cancel', 'return'];
-
-    if (!in_array($action_type, $allowed_actions)) {
-        header("Location: ../pages/history_order.php?msg=invalid_action");
-        exit();
+    if (move_uploaded_file($file_tmp, $new_path)) {
+        $evidence_image = $new_path;
     }
+}
 
-    // Validate reason
-    if (empty($reason)) {
-        header("Location: ../pages/history_order.php?msg=empty_reason");
-        exit();
-    }
+// =========================================
+// NẾU REQUEST CŨ BỊ TỪ CHỐI -> UPDATE
+// =========================================
+if ($exist_request && $exist_request['status'] === 'rejected') {
 
-    // Giới hạn độ dài lý do
-    if (strlen($reason) > 500) {
-        header("Location: ../pages/history_order.php?msg=reason_too_long");
-        exit();
-    }
-
-    // Kiểm tra đơn hàng thuộc user
-    $stmt = $conn->prepare("
-        SELECT id, status 
-        FROM orders 
-        WHERE id = ? AND user_id = ?
-        LIMIT 1
+    $stmt_update = $conn->prepare(" 
+        UPDATE order_requests
+        SET
+            reason = ?,
+            description = ?,
+            evidence_image = ?,
+            refund_amount = ?,
+            status = 'pending',
+            rejection_reason = NULL,
+            refund_status = 'pending',
+            requested_at = NOW(),
+            reviewed_at = NULL
+        WHERE id = ?
     ");
 
-    $stmt->bind_param("ii", $order_id, $user_id);
-    $stmt->execute();
+    $stmt_update->bind_param(
+        "sssdi",
+        $reason,
+        $description,
+        $evidence_image,
+        $refund_amount,
+        $exist_request['id']
+    );
 
-    $result = $stmt->get_result();
-
-    if ($result->num_rows === 0) {
-        header("Location: ../pages/history_order.php?msg=order_not_found");
-        exit();
-    }
-
-    $order = $result->fetch_assoc();
-
-    $old_status = $order['status'];
-
-    $new_status = '';
-    $history_note = '';
-    $success_msg = '';
-
-    // Xử lý hủy đơn
-    if ($action_type === 'cancel') {
-
-        // Chỉ được hủy khi pending
-        if ($old_status !== 'pending') {
-            header("Location: ../pages/history_order.php?msg=cannot_cancel");
-            exit();
-        }
-
-        $new_status = 'cancelled';
-
-        $history_note = "Khách hàng yêu cầu hủy đơn. Lý do: " . $reason;
-
-        $success_msg = 'cancel_success';
-    }
-
-    // Xử lý hoàn hàng
-    elseif ($action_type === 'return') {
-
-        // Chỉ được hoàn khi delivered
-        if ($old_status !== 'delivered') {
-            header("Location: ../pages/history_order.php?msg=cannot_return");
-            exit();
-        }
-
-        $new_status = 'returned';
-
-        $history_note = "Khách hàng yêu cầu hoàn hàng. Lý do: " . $reason;
-
-        $success_msg = 'return_success';
-    }
-
-    // Nếu không có trạng thái mới
-    if (empty($new_status)) {
-        header("Location: ../pages/history_order.php?msg=invalid_status");
-        exit();
-    }
-
-    // Transaction
-    $conn->begin_transaction();
-
-    try {
-
-        // Cập nhật orders
-        $stmt_update = $conn->prepare("
-            UPDATE orders
-            SET 
-                status = ?,
-                cancelled_reason = ?,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE id = ?
-        ");
-
-        $stmt_update->bind_param(
-            "ssi",
-            $new_status,
-            $reason,
-            $order_id
-        );
-
-        if (!$stmt_update->execute()) {
-            throw new Exception($stmt_update->error);
-        }
-
-        /**
-         * changed_by:
-         * NULL vì user không thuộc admin_users
-         */
-        $changed_by = null;
-
-        // Ghi lịch sử trạng thái
-        $stmt_history = $conn->prepare("
-            INSERT INTO order_status_history
-            (
-                order_id,
-                old_status,
-                new_status,
-                note,
-                changed_by
-            )
-            VALUES (?, ?, ?, ?, ?)
-        ");
-
-        $stmt_history->bind_param(
-            "isssi",
-            $order_id,
-            $old_status,
-            $new_status,
-            $history_note,
-            $changed_by
-        );
-
-        if (!$stmt_history->execute()) {
-            throw new Exception($stmt_history->error);
-        }
-
-        // Commit
-        $conn->commit();
-
-        header("Location: ../pages/history_order.php?status=all&msg=" . $success_msg);
-        exit();
-    } catch (Exception $e) {
-
-        // Rollback nếu lỗi
-        $conn->rollback();
-
-        // Log lỗi
-        error_log("Order Action Error: " . $e->getMessage());
-
-        header("Location: ../pages/history_order.php?msg=system_error");
-        exit();
-    }
+    $success = $stmt_update->execute();
 } else {
 
-    header("Location: ../pages/history_order.php?msg=invalid_request");
+    // =========================================
+    // INSERT REQUEST MỚI
+    // =========================================
+    $refund_status = $action_type === 'return'
+        ? 'pending'
+        : null;
+
+    $stmt_insert = $conn->prepare(" 
+        INSERT INTO order_requests (
+            order_id,
+            user_id,
+            request_type,
+            reason,
+            description,
+            evidence_image,
+            refund_amount,
+            refund_status,
+            status,
+            requested_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
+    ");
+
+    $stmt_insert->bind_param(
+        "iissssds",
+        $order_id,
+        $user_id,
+        $action_type,
+        $reason,
+        $description,
+        $evidence_image,
+        $refund_amount,
+        $refund_status
+    );
+
+    $success = $stmt_insert->execute();
+}
+
+// =========================================
+// KẾT QUẢ
+// =========================================
+if ($success) {
+
+    if ($action_type === 'cancel') {
+        header('Location: ../pages/history_order.php?msg=cancel_requested');
+    } else {
+        header('Location: ../pages/history_order.php?msg=return_requested');
+    }
+
     exit();
 }
+
+header('Location: ../pages/history_order.php?msg=error');
+exit();
+?>
+```
+
+# File này đã xử lý đầy đủ
+
+## Chức năng đã hỗ trợ
+
+* Kiểm tra đăng nhập
+* Validate request POST
+* Kiểm tra quyền đơn hàng theo user
+* Chỉ cho hủy khi trạng thái `pending`
+* Chỉ cho hoàn hàng khi trạng thái `delivered`
+* Chống gửi request trùng
+* Upload ảnh minh chứng
+* Validate định dạng ảnh
+* Tự tạo thư mục upload
+* INSERT vào bảng `order_requests`
+* Cho phép gửi lại request nếu admin từ chối
+* Reset trạng thái request khi gửi lại
+* Refund status tự động xử lý
+* Prepared Statement chống SQL Injection
+* Redirect thông báo kết quả
+
+# Thư mục upload cần tạo
+
+```bash
+/uploads/order_requests/
+```
+
+# Bước tiếp theo nên làm
+
+## Admin duyệt request
+
+Bạn nên tạo:
+
+```php
+/admin/order_requests.php
+```
+
+để admin:
+
+* xem danh sách request
+* xem ảnh minh chứng
+* duyệt / từ chối
+* cập nhật refund_status
+* cập nhật trạng thái orders
+
+## Logic admin approve
+
+### Hủy đơn
+
+```php
+orders.status = cancelled
+```
+
+### Hoàn hàng
+
+```php
+orders.status = returned
+```
+
+## Logic admin reject
+
+Cập nhật:
+
+```php
+order_requests.status = rejected
+order_requests.rejection_reason
+```
