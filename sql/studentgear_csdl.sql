@@ -199,7 +199,7 @@ CREATE TABLE IF NOT EXISTS statistics (
   INDEX idx_date (date)
 );
 
--- 1. Create order_requests table
+-- Create order_requests table
 CREATE TABLE IF NOT EXISTS `order_requests` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `order_id` INT NOT NULL,

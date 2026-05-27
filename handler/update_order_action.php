@@ -30,9 +30,7 @@ if (!in_array($action_type, ['cancel', 'return'])) {
     exit();
 }
 
-// =========================================
 // KIỂM TRA ĐƠN HÀNG
-// =========================================
 $stmt_order = $conn->prepare(" 
     SELECT * 
     FROM orders 
@@ -50,9 +48,7 @@ if (!$order) {
     exit();
 }
 
-// =========================================
 // VALIDATE THEO LOẠI YÊU CẦU
-// =========================================
 if ($action_type === 'cancel' && $order['status'] !== 'pending') {
     header('Location: ../pages/history_order.php?msg=error');
     exit();
@@ -63,9 +59,7 @@ if ($action_type === 'return' && $order['status'] !== 'delivered') {
     exit();
 }
 
-// =========================================
 // KIỂM TRA REQUEST ĐANG TỒN TẠI
-// =========================================
 $stmt_exist = $conn->prepare(" 
     SELECT id, status
     FROM order_requests
@@ -85,11 +79,8 @@ if ($exist_request && $exist_request['status'] === 'pending') {
     exit();
 }
 
-// =========================================
 // XỬ LÝ ẢNH MINH CHỨNG
-// =========================================
 $evidence_image = null;
-
 if (
     isset($_FILES['evidence_image']) &&
     $_FILES['evidence_image']['error'] === 0
@@ -112,19 +103,14 @@ if (
         header('Location: ../pages/history_order.php?msg=error');
         exit();
     }
-
     $new_path = $upload_dir . $file_name;
-
     if (move_uploaded_file($file_tmp, $new_path)) {
         $evidence_image = $new_path;
     }
 }
 
-// =========================================
 // NẾU REQUEST CŨ BỊ TỪ CHỐI -> UPDATE
-// =========================================
 if ($exist_request && $exist_request['status'] === 'rejected') {
-
     $stmt_update = $conn->prepare(" 
         UPDATE order_requests
         SET
@@ -139,7 +125,6 @@ if ($exist_request && $exist_request['status'] === 'rejected') {
             reviewed_at = NULL
         WHERE id = ?
     ");
-
     $stmt_update->bind_param(
         "sssdi",
         $reason,
@@ -148,17 +133,12 @@ if ($exist_request && $exist_request['status'] === 'rejected') {
         $refund_amount,
         $exist_request['id']
     );
-
     $success = $stmt_update->execute();
 } else {
-
-    // =========================================
     // INSERT REQUEST MỚI
-    // =========================================
     $refund_status = $action_type === 'return'
         ? 'pending'
         : null;
-
     $stmt_insert = $conn->prepare(" 
         INSERT INTO order_requests (
             order_id,
@@ -174,7 +154,6 @@ if ($exist_request && $exist_request['status'] === 'rejected') {
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
     ");
-
     $stmt_insert->bind_param(
         "iissssds",
         $order_id,
@@ -186,13 +165,10 @@ if ($exist_request && $exist_request['status'] === 'rejected') {
         $refund_amount,
         $refund_status
     );
-
     $success = $stmt_insert->execute();
 }
 
-// =========================================
 // KẾT QUẢ
-// =========================================
 if ($success) {
 
     if ($action_type === 'cancel') {
@@ -207,71 +183,3 @@ if ($success) {
 header('Location: ../pages/history_order.php?msg=error');
 exit();
 ?>
-```
-
-# File này đã xử lý đầy đủ
-
-## Chức năng đã hỗ trợ
-
-* Kiểm tra đăng nhập
-* Validate request POST
-* Kiểm tra quyền đơn hàng theo user
-* Chỉ cho hủy khi trạng thái `pending`
-* Chỉ cho hoàn hàng khi trạng thái `delivered`
-* Chống gửi request trùng
-* Upload ảnh minh chứng
-* Validate định dạng ảnh
-* Tự tạo thư mục upload
-* INSERT vào bảng `order_requests`
-* Cho phép gửi lại request nếu admin từ chối
-* Reset trạng thái request khi gửi lại
-* Refund status tự động xử lý
-* Prepared Statement chống SQL Injection
-* Redirect thông báo kết quả
-
-# Thư mục upload cần tạo
-
-```bash
-/uploads/order_requests/
-```
-
-# Bước tiếp theo nên làm
-
-## Admin duyệt request
-
-Bạn nên tạo:
-
-```php
-/admin/order_requests.php
-```
-
-để admin:
-
-* xem danh sách request
-* xem ảnh minh chứng
-* duyệt / từ chối
-* cập nhật refund_status
-* cập nhật trạng thái orders
-
-## Logic admin approve
-
-### Hủy đơn
-
-```php
-orders.status = cancelled
-```
-
-### Hoàn hàng
-
-```php
-orders.status = returned
-```
-
-## Logic admin reject
-
-Cập nhật:
-
-```php
-order_requests.status = rejected
-order_requests.rejection_reason
-```
