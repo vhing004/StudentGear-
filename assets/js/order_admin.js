@@ -173,3 +173,81 @@ function openEditOrderModal(order) {
   // 2. Gọi hàm mở modal đã có animation của bạn
   openModal("editOrderModal");
 }
+function openRejectModal(requestId) {
+  document.getElementById("reject_request_id").value = requestId;
+  openModal("rejectModal");
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const statusSelect = document.getElementById("edit_order_status");
+  const noteTextarea = document.getElementById("edit_order_note");
+
+  const statusNotes = {
+    pending: "Đơn hàng đang chờ hệ thống kiểm tra thông tin và chuẩn bị.",
+    confirmed:
+      "Đơn hàng đã được StudentGear xác nhận thành công và chuẩn bị đóng gói.",
+    shipping:
+      "Đơn hàng đã đóng gói hoàn tất và bàn giao cho đơn vị vận chuyển.",
+    delivered: "Đơn hàng đã được giao thành công đến tay khách hàng.",
+    cancelled: "Đơn hàng đã bị hủy bỏ bởi ban quản trị hệ thống.",
+    returned:
+      "Hệ thống đã nhận lại hàng hoàn trả và xử lý thủ tục cho quý khách.",
+  };
+
+  if (statusSelect && noteTextarea) {
+    statusSelect.addEventListener("change", function () {
+      const selectedStatus = this.value;
+      if (statusNotes[selectedStatus] !== undefined) {
+        noteTextarea.value = statusNotes[selectedStatus];
+      } else {
+        noteTextarea.value = "";
+      }
+    });
+  }
+
+  const originalOpenEditModal = window.openEditOrderModal;
+  window.openEditOrderModal = function (orderData) {
+    if (typeof originalOpenEditModal === "function") {
+      originalOpenEditModal(orderData);
+    }
+
+    const currentStatus = orderData.status;
+    const statusWeights = {
+      pending: 1,
+      confirmed: 2,
+      shipping: 3,
+      delivered: 4,
+      cancelled: 5,
+      returned: 6,
+    };
+    const currentWeight = statusWeights[currentStatus] || 0;
+
+    Array.from(statusSelect.options).forEach((option) => {
+      const optionValue = option.value;
+      const optionWeight = statusWeights[optionValue] || 0;
+
+      option.disabled = false;
+      option.style.display = "block";
+
+      if (optionWeight <= currentWeight) {
+        option.disabled = true;
+        option.style.display = "none";
+      }
+      if (currentStatus === "pending" && optionValue === "delivered") {
+        option.disabled = true;
+        option.style.display = "none";
+      }
+    });
+
+    for (let i = 0; i < statusSelect.options.length; i++) {
+      if (!statusSelect.options[i].disabled) {
+        statusSelect.value = statusSelect.options[i].value;
+        break;
+      }
+    }
+
+    if (statusSelect) {
+      statusSelect.dispatchEvent(new Event("change"));
+    }
+  };
+});

@@ -13,9 +13,7 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $status_filter = isset($_GET['status']) ? trim($_GET['status']) : 'all';
 
-// =========================
 // QUERY ĐƠN HÀNG
-// =========================
 $sql_orders = "SELECT * FROM orders WHERE user_id = ?";
 $params = [$user_id];
 $types = "i";
@@ -38,151 +36,8 @@ $stmt_orders->execute();
 $res_orders = $stmt_orders->get_result();
 ?>
 
-<style>
-    .reason-modal {
-        display: none;
-        position: fixed;
-        z-index: 9999;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
-
-    .reason-modal__content {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        width: 100%;
-        max-width: 500px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        animation: fadeInModal 0.3s ease;
-    }
-
-    @keyframes fadeInModal {
-        from {
-            transform: translateY(-20px);
-            opacity: 0;
-        }
-
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-
-    .reason-modal__header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 10px;
-    }
-
-    .reason-modal__header h3 {
-        margin: 0;
-        font-size: 1.7rem;
-        color: #222;
-    }
-
-    .reason-modal__close {
-        background: none;
-        border: none;
-        font-size: 28px;
-        cursor: pointer;
-        color: #999;
-    }
-
-    .reason-modal__close:hover {
-        color: #000;
-    }
-
-    .reason-form-group {
-        margin-bottom: 16px;
-    }
-
-    .reason-form-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: #444;
-        font-size: 1.3rem;
-    }
-
-    .reason-form-group select,
-    .reason-form-group textarea,
-    .reason-form-group input[type="file"] {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        font-family: inherit;
-    }
-
-    .reason-modal__footer {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        border-top: 1px solid #eee;
-        padding-top: 15px;
-    }
-
-    .request-status {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 7px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .request-status.pending {
-        background: #fff3cd;
-        color: #856404;
-    }
-
-    .request-status.approved {
-        background: #d4edda;
-        color: #155724;
-    }
-
-    .request-status.rejected {
-        background: #f8d7da;
-        color: #721c24;
-    }
-
-    .refund-status {
-        margin-top: 5px;
-        font-size: 12px;
-    }
-
-    .refund-status.pending {
-        color: #856404;
-    }
-
-    .refund-status.refunded {
-        color: #28a745;
-    }
-
-    .rejection-box {
-        margin-top: 6px;
-        padding: 8px 10px;
-        border-radius: 6px;
-        background: #fff5f5;
-        color: #c0392b;
-        font-size: 12px;
-    }
-</style>
-
 <main class="order-history-page">
     <div class="container">
-
         <div class="order-tabs">
             <a href="?status=all" class="<?= $status_filter == 'all' ? 'active' : '' ?>">Tất cả</a>
             <a href="?status=pending" class="<?= $status_filter == 'pending' ? 'active' : '' ?>">Chờ xác nhận</a>
@@ -192,6 +47,7 @@ $res_orders = $stmt_orders->get_result();
             <a href="?status=cancelled" class="<?= $status_filter == 'cancelled' ? 'active' : '' ?>">Đã hủy</a>
         </div>
 
+        <!-- Thông báo khi gửi yêu cầu  -->
         <?php if (isset($_GET['msg']) && $_GET['msg'] === 'cancel_requested'): ?>
             <div style="background:#d4edda;color:#155724;padding:12px;border-radius:6px;margin-bottom:15px;">
                 Đã gửi yêu cầu hủy đơn thành công!
@@ -216,18 +72,13 @@ $res_orders = $stmt_orders->get_result();
             </div>
         <?php endif; ?>
 
+        <!-- Hiển thị danh sách đơn hàng  -->
         <div class="order-list">
-
             <?php if ($res_orders->num_rows > 0): ?>
-
                 <?php while ($order = $res_orders->fetch_assoc()): ?>
-
                     <?php
                     $order_id = $order['id'];
-
-                    // =========================
                     // LẤY SẢN PHẨM
-                    // =========================
                     $stmt_items = $conn->prepare("
                         SELECT
                             oi.*,
@@ -236,14 +87,11 @@ $res_orders = $stmt_orders->get_result();
                         JOIN products p ON oi.product_id = p.id
                         WHERE oi.order_id = ?
                     ");
-
                     $stmt_items->bind_param("i", $order_id);
                     $stmt_items->execute();
                     $res_items = $stmt_items->get_result();
 
-                    // =========================
                     // LẤY YÊU CẦU HỦY / HOÀN
-                    // =========================
                     $stmt_request = $conn->prepare("
                         SELECT
                             request_type,
@@ -269,74 +117,56 @@ $res_orders = $stmt_orders->get_result();
                     ?>
 
                     <div class="order-card">
-
                         <div class="order-header">
                             <span class="shop-name">
                                 <i class="fa-solid fa-store"></i>
                                 StudentGear Official
                             </span>
-
                             <div class="order-status">
                                 <i class="fa-solid fa-truck"></i>
-
                                 <?php
                                 $status_text = 'ĐANG XỬ LÝ';
-
                                 switch ($order['status']) {
                                     case 'pending':
                                         $status_text = 'CHỜ XÁC NHẬN';
                                         break;
-
                                     case 'confirmed':
                                         $status_text = 'ĐÃ XÁC NHẬN';
                                         break;
-
                                     case 'shipping':
                                         $status_text = 'ĐANG GIAO';
                                         break;
-
                                     case 'delivered':
                                         $status_text = 'HOÀN THÀNH';
                                         break;
-
                                     case 'cancelled':
                                         $status_text = 'ĐÃ HỦY';
                                         break;
-
                                     case 'returned':
                                         $status_text = 'ĐÃ TRẢ HÀNG';
                                         break;
                                 }
-
                                 echo htmlspecialchars($status_text);
                                 ?>
                             </div>
                         </div>
-
                         <?php while ($item = $res_items->fetch_assoc()): ?>
-
                             <div class="product-info">
                                 <img src="<?= htmlspecialchars($item['image']) ?>" alt="product">
-
                                 <div class="details">
                                     <p class="name">
                                         <?= htmlspecialchars($item['product_name']) ?>
                                     </p>
-
                                     <p class="qty">
                                         x<?= (int)$item['quantity'] ?>
                                     </p>
                                 </div>
-
                                 <div class="price">
                                     <?= number_format($item['price'], 0, ',', '.') ?>₫
                                 </div>
                             </div>
-
                         <?php endwhile; ?>
-
                         <div class="order-footer">
-
                             <div class="total-section">
                                 Thành tiền:
                                 <span class="total-amount">
@@ -345,11 +175,8 @@ $res_orders = $stmt_orders->get_result();
                             </div>
 
                             <div class="actions" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
-
                                 <?php if ($has_request): ?>
-
                                     <?php if ($has_request['status'] === 'pending'): ?>
-
                                         <div>
                                             <span class="request-status pending">
                                                 <i class="fas fa-clock"></i>
@@ -359,17 +186,13 @@ $res_orders = $stmt_orders->get_result();
                                         </div>
 
                                     <?php elseif ($has_request['status'] === 'approved'): ?>
-
                                         <div>
                                             <span class="request-status approved">
                                                 <i class="fas fa-check-circle"></i>
                                                 Yêu cầu đã được duyệt
                                             </span>
-
                                             <?php if (!empty($has_request['refund_status'])): ?>
-
                                                 <div class="refund-status <?= htmlspecialchars($has_request['refund_status']) ?>">
-
                                                     <?php
                                                     if ($has_request['refund_status'] === 'pending') {
                                                         echo 'Đang xử lý hoàn tiền';
@@ -380,27 +203,21 @@ $res_orders = $stmt_orders->get_result();
                                                     }
                                                     ?>
                                                 </div>
-
                                             <?php endif; ?>
                                         </div>
 
                                     <?php elseif ($has_request['status'] === 'rejected'): ?>
-
                                         <div>
                                             <span class="request-status rejected">
                                                 <i class="fas fa-times-circle"></i>
                                                 Yêu cầu đã bị từ chối
                                             </span>
-
                                             <?php if (!empty($has_request['rejection_reason'])): ?>
-
                                                 <div class="rejection-box">
                                                     <?= htmlspecialchars($has_request['rejection_reason']) ?>
                                                 </div>
-
                                             <?php endif; ?>
                                         </div>
-
                                         <?php if ($order['status'] === 'pending'): ?>
                                             <button
                                                 onclick="openReasonModal(<?= $order['id'] ?>, 'cancel', 'Yêu cầu hủy đơn hàng', <?= $order['total_price'] ?>)"
@@ -418,60 +235,44 @@ $res_orders = $stmt_orders->get_result();
                                                 Gửi Lại Yêu Cầu
                                             </button>
                                         <?php endif; ?>
-
                                     <?php endif; ?>
-
                                 <?php else: ?>
-
                                     <?php if ($order['status'] === 'pending'): ?>
-
                                         <button
                                             onclick="openReasonModal(<?= $order['id'] ?>, 'cancel', 'Yêu cầu hủy đơn hàng', <?= $order['total_price'] ?>)"
                                             class="btn"
                                             style="background:#dc3545;color:#fff;border:none;cursor:pointer;">
                                             Hủy Đơn
                                         </button>
-
                                     <?php endif; ?>
-
                                     <?php if ($order['status'] === 'delivered'): ?>
-
                                         <button
                                             onclick="openReasonModal(<?= $order['id'] ?>, 'return', 'Yêu cầu Trả hàng / Hoàn tiền', <?= $order['total_price'] ?>)"
                                             class="btn"
                                             style="background:#ffc107;color:#212529;border:none;cursor:pointer;">
                                             Trả Hàng / Hoàn Tiền
                                         </button>
-
                                         <a href="../handler/reorder_process.php?order_id=<?= $order['id'] ?>"
                                             class="btn btn-primary"
                                             style="text-decoration:none;">
                                             Mua Lại
                                         </a>
-
                                     <?php endif; ?>
-
                                 <?php endif; ?>
-
                                 <a href="../pages/order_detail.php?id=<?= $order['id'] ?>"
                                     class="btn btn-outline"
                                     style="text-decoration:none;">
                                     Xem Chi Tiết
                                 </a>
-
                             </div>
                         </div>
                     </div>
-
                 <?php endwhile; ?>
-
             <?php else: ?>
-
                 <div class="empty-orders">
                     <img src="../assets/images/empty-order.png" alt="empty-order">
                     <p>Chưa có đơn hàng nào</p>
                 </div>
-
             <?php endif; ?>
         </div>
     </div>
@@ -479,67 +280,52 @@ $res_orders = $stmt_orders->get_result();
 
 <!-- MODAL -->
 <div id="userReasonModal" class="reason-modal">
-
     <div class="reason-modal__content">
-
         <div class="reason-modal__header">
             <h3 id="modal_action_title">Nhập lý do</h3>
-
             <button onclick="closeReasonModal()"
                 class="reason-modal__close">
                 &times;
             </button>
         </div>
-
         <form action="../handler/update_order_action.php"
             method="POST"
             enctype="multipart/form-data"
             id="reasonActionForm">
-
             <input type="hidden" name="order_id" id="action_order_id">
             <input type="hidden" name="action_type" id="action_type">
             <input type="hidden" name="refund_amount" id="action_refund_amount">
-
             <div class="reason-form-group">
                 <label id="modal_label_text">
                     Vui lòng cung cấp lý do cụ thể:
                 </label>
-
                 <select name="reason"
                     id="user_reason_select"
                     required>
                 </select>
             </div>
-
             <div class="reason-form-group">
                 <label>Mô tả chi tiết thêm</label>
-
                 <textarea name="description"
                     id="user_description_input"
                     rows="4"
                     placeholder="Nhập mô tả chi tiết..."></textarea>
             </div>
-
             <div class="reason-form-group"
                 id="evidence_upload_box"
                 style="display:none;">
-
                 <label>Ảnh minh chứng</label>
-
                 <input type="file"
                     name="evidence_image"
                     accept="image/*">
             </div>
-
             <div class="reason-modal__footer">
-
                 <button type="button"
                     class="btn"
                     style="background:#e2e8f0;border:none;cursor:pointer;"
                     onclick="closeReasonModal()">
                     Đóng
                 </button>
-
                 <button type="submit"
                     class="btn btn-primary"
                     style="border:none;cursor:pointer;">
@@ -578,11 +364,9 @@ $res_orders = $stmt_orders->get_result();
     ];
 
     function openReasonModal(orderId, action, titleText, totalPrice) {
-
         orderIdInput.value = orderId;
         actionTypeInput.value = action;
         refundAmountInput.value = totalPrice;
-
         modalTitle.innerText = titleText;
         reasonSelect.innerHTML = '';
         descInput.value = '';
@@ -605,7 +389,6 @@ $res_orders = $stmt_orders->get_result();
             option.textContent = reason;
             reasonSelect.appendChild(option);
         });
-
         modal.style.display = 'flex';
     }
 
@@ -621,25 +404,3 @@ $res_orders = $stmt_orders->get_result();
 </script>
 
 <?php include '../includes/footer.php'; ?>
-```
-
-# File này đã cập nhật đầy đủ
-
-## Đã hỗ trợ
-
-* Hủy đơn hàng
-* Trả hàng / hoàn tiền
-* Hiển thị trạng thái request
-* Hiển thị request pending / approved / rejected
-* Hiển thị lý do admin từ chối
-* Hiển thị trạng thái hoàn tiền
-* Upload ảnh minh chứng
-* Prepared statement chống SQL Injection
-* Gửi lại request khi bị từ chối
-* Responsive UI tốt hơn
-* Tách logic rõ ràng
-* Hỗ trợ bảng `order_requests`
-
-# File: ../handler/update_order_action.php
-
-```php

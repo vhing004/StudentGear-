@@ -142,7 +142,7 @@ while ($cat = $categories->fetch_assoc()) {
                                     </td>
                                     <td style="max-width: 200px;"><strong><?= htmlspecialchars($row['name']) ?></strong></td>
                                     <td>
-                                        <small>Nhập: <?= number_format($row['price'] ?? 0, 0, ',', '.') ?>₫</small><br>
+                                        <small>Nhập: <?= number_format($row['cost_price'] ?? 0, 0, ',', '.') ?>₫</small><br>
                                         <strong>Bán: <?= number_format($row['price'], 0, ',', '.') ?>₫</strong>
                                     </td>
                                     <td><?= $row['category_name'] ?></td>

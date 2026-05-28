@@ -7,9 +7,7 @@ $cat_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $sort = isset($_GET['sort']) ? $_GET['sort'] : 'default';
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-// =========================================================================
-// [BỔ SUNG LOGIC]: TỰ ĐỘNG TÍNH MỐC GIÁ CAO NHẤT ĐỘNG THEO TỪNG DANH MỤC
-// =========================================================================
+// TỰ ĐỘNG TÍNH MỐC GIÁ CAO NHẤT ĐỘNG THEO TỪNG DANH MỤC
 $sql_max = "SELECT MAX(price) as max_p FROM products WHERE is_active = 1";
 if ($cat_id > 0) {
     $sql_max .= " AND category_id = $cat_id";
@@ -26,7 +24,6 @@ if ($ceil_price <= 0) {
 // Tiếp nhận giá trị lọc người dùng kéo chọn (Nếu chưa kéo thì mặc định lấy kịch khung Max)
 $min_price = 0; // Luôn cố định từ 0đ cho bộ lọc thanh trượt đơn
 $max_price = isset($_GET['max']) ? intval($_GET['max']) : $ceil_price;
-// =========================================================================
 
 // 2. Lấy thông tin danh mục hiện tại để làm Breadcrumb và Tiêu đề
 $current_cat = null;

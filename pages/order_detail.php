@@ -32,77 +32,20 @@ $sql_history = "SELECT * FROM order_status_history
                 ORDER BY created_at DESC";
 $res_history = $conn->query($sql_history);
 
-// function getStatusClass($status)
-// {
-//     switch (strtolower($status)) {
-//         case 'pending':
-//             return 'status-pending';   // Chờ xử lý - Cam
-//         case 'confirmed':
-//             return 'status-confirmed'; // Đã xác nhận - Xanh biển nhạt
-//         case 'shipping':
-//             return 'status-shipping';  // Đang giao - Xanh biển đậm
-//         case 'delivered':
-//             return 'status-delivered'; // Đã giao - Xanh lá
-//         case 'cancelled':
-//             return 'status-cancelled'; // Đã hủy - Đỏ
-//         default:
-//             return 'status-default';
-//     }
-// }
-
-// function getStatusText($status)
-// {
-//     $text = [
-//         'pending'   => 'CHỜ XỬ LÝ',
-//         'confirmed' => 'ĐÃ XÁC NHẬN',
-//         'shipping'  => 'ĐANG GIAO HÀNG',
-//         'delivered' => 'ĐÃ GIAO THÀNH CÔNG',
-//         'cancelled' => 'ĐÃ HỦY'
-//     ];
-//     return $text[strtolower($status)] ?? strtoupper($status);
-// }
-
-// function getStatusInfo($status)
-// {
-//     $map = [
-//         'pending'   => ['text' => 'Chờ xử lý', 'class' => 'badge-warning', 'icon' => 'fa-clock'],
-//         'confirmed' => ['text' => 'Đã xác nhận', 'class' => 'badge-info', 'icon' => 'fa-check-circle'],
-//         'shipping'  => ['text' => 'Đang giao hàng', 'class' => 'badge-primary', 'icon' => 'fa-truck'],
-//         'delivered' => ['text' => 'Đã giao thành công', 'class' => 'badge-success', 'icon' => 'fa-box-open'],
-//         'cancelled' => ['text' => 'Đã hủy', 'class' => 'badge-danger', 'icon' => 'fa-times-circle'],
-//     ];
-//     return $map[$status] ?? ['text' => $status, 'class' => 'badge-secondary', 'icon' => 'fa-info-circle'];
-// }
-
-// function getStatusTimelineConfig($status)
-// {
-//     switch ($status) {
-//         case 'pending':
-//             return ['color' => '#ff9800', 'bg' => '#fff4e5', 'icon' => 'fa-clock', 'text' => 'Chờ xử lý'];
-//         case 'confirmed':
-//             return ['color' => '#0288d1', 'bg' => '#e3f2fd', 'icon' => 'fa-check-circle', 'text' => 'Đã xác nhận'];
-//         case 'shipping':
-//             return ['color' => '#3f51b5', 'bg' => '#e8eaf6', 'icon' => 'fa-truck', 'text' => 'Đang giao hàng'];
-//         case 'delivered':
-//             return ['color' => '#2e7d32', 'bg' => '#edf7ed', 'icon' => 'fa-box-open', 'text' => 'Đã giao thành công'];
-//         case 'cancelled':
-//             return ['color' => '#d32f2f', 'bg' => '#fdeded', 'icon' => 'fa-times-circle', 'text' => 'Đã hủy'];
-//         default:
-//             return ['color' => '#757575', 'bg' => '#f5f5f5', 'icon' => 'fa-info-circle', 'text' => $status];
-//     }
-// }
-
-
+/**
+ * CẬP NHẬT: Mở rộng các trạng thái hiển thị log trên Timeline 
+ * Giúp nhận diện đẹp mắt cả khi user gửi yêu cầu và khi admin duyệt phản hồi.
+ */
 function getOrderStatusMaster($status)
 {
     $status = strtolower($status);
     $configs = [
         'pending' => [
             'text'   => 'Chờ xử lý',
-            'class'  => 'status-pending', // Class cho text highlight
-            'badge'  => 'badge-warning',  // Class cho badge admin
-            'color'  => '#ff9800',        // Màu cam
-            'bg'     => '#fff4e5',        // Nền cam nhạt
+            'class'  => 'status-pending',
+            'badge'  => 'badge-warning',
+            'color'  => '#ff9800',
+            'bg'     => '#fff4e5',
             'icon'   => 'fa-clock'
         ],
         'confirmed' => [
@@ -138,12 +81,39 @@ function getOrderStatusMaster($status)
             'icon'   => 'fa-times-circle'
         ],
         'returned' => [
-            'text'   => 'Trả hàng',
+            'text'   => 'Đã trả hàng / Hoàn tiền',
             'class'  => 'status-default',
             'badge'  => 'badge-secondary',
             'color'  => '#757575',
             'bg'     => '#f5f5f5',
             'icon'   => 'fa-undo'
+        ],
+        // ==========================================
+        // CÁC TRẠNG THÁI BỔ SUNG DÀNH CHO KHỐI LOG HOÀN / HỦY ĐƠN
+        // ==========================================
+        'request_pending' => [
+            'text'   => 'Yêu cầu hoàn/hủy mới',
+            'class'  => 'status-pending',
+            'badge'  => 'badge-warning',
+            'color'  => '#e67e22',
+            'bg'     => '#fdf2e9',
+            'icon'   => 'fa-paper-plane'
+        ],
+        'request_approved' => [
+            'text'   => 'Yêu cầu được chấp nhận',
+            'class'  => 'status-delivered',
+            'badge'  => 'badge-success',
+            'color'  => '#27ae60',
+            'bg'     => '#e8f8f5',
+            'icon'   => 'fa-clipboard-check'
+        ],
+        'request_rejected' => [
+            'text'   => 'Yêu cầu bị từ chối',
+            'class'  => 'status-cancelled',
+            'badge'  => 'badge-danger',
+            'color'  => '#c0392b',
+            'bg'     => '#f9ebea',
+            'icon'   => 'fa-user-times'
         ]
     ];
 
@@ -170,22 +140,58 @@ function getOrderStatusMaster($status)
             </div>
         </div>
 
-
         <!-- Timeline Trạng Thái -->
         <section class="order-history">
             <div class="payment-status">
                 <span>Trạng thái thanh toán:</span>
-                <strong class="payment-badge <?= $order['payment_status'] == 'paid' ? 'status-delivered' : 'status-cancelled' ?>">
-                    <i class="fa-solid <?= $order['payment_status'] == 'paid' ? 'fa-circle-check' : 'fa-circle-exclamation' ?>"></i>
-                    <?= $order['payment_status'] == 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán' ?>
-                </strong>
+                <?php
+                // Kiểm tra xem đơn hàng đã từng được hoàn tiền thành công trong lịch sử chưa
+                $is_refunded = false;
+                if ($res_history && $res_history->num_rows > 0) {
+                    while ($check_log = $res_history->fetch_assoc()) {
+                        $lower_note_check = mb_strtolower($check_log['note'], 'UTF-8');
+                        if (strpos($lower_note_check, 'hoàn tiền thành công') !== false) {
+                            $is_refunded = true;
+                            break;
+                        }
+                    }
+                    // Giải phóng và đưa con trỏ dữ liệu về lại vị trí đầu tiên để vòng lặp timeline ở dưới vẫn chạy bình thường
+                    $res_history->data_seek(0);
+                }
+                ?>
+
+                <?php if ($is_refunded): ?>
+                    <strong class="payment-badge" style="background-color: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; padding: 4px 8px; border-radius: 4px;">
+                        <i class="fa-solid fa-money-bill-wave"></i>
+                        Đã hoàn tiền
+                    </strong>
+                <?php else: ?>
+                    <strong class="payment-badge <?= $order['payment_status'] == 'paid' ? 'status-delivered' : 'status-cancelled' ?>">
+                        <i class="fa-solid <?= $order['payment_status'] == 'paid' ? 'fa-circle-check' : 'fa-circle-exclamation' ?>"></i>
+                        <?= $order['payment_status'] == 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán' ?>
+                    </strong>
+                <?php endif; ?>
             </div>
+            
             <h3><i class="fas fa-history"></i> Lịch sử đơn hàng</h3>
             <div class="timeline-v2">
                 <?php if ($res_history && $res_history->num_rows > 0): ?>
                     <?php while ($h = $res_history->fetch_assoc()):
-                        // Gọi hàm Master để lấy toàn bộ cấu hình màu sắc, icon
-                        $config = getOrderStatusMaster($h['new_status']);
+                        /**
+                         * GIẢI PHÁP ĐỌC LOG THÔNG MINH:
+                         * Nếu trong nội dung cột `note` chứa từ khóa phân biệt hành vi hoàn/hủy,
+                         * hệ thống tự động trỏ về cấu hình giao diện đặc trưng (giao diện ảo) thay vì dùng vòng lặp mặc định.
+                         */
+                        $status_key = $h['new_status'];
+                        if (strpos($h['note'], 'gửi yêu cầu') !== false) {
+                            $status_key = 'request_pending';
+                        } elseif (strpos($h['note'], 'từ chối yêu cầu') !== false) {
+                            $status_key = 'request_rejected';
+                        } elseif (strpos($h['note'], 'đã duyệt yêu cầu') !== false) {
+                            $status_key = 'request_approved';
+                        }
+
+                        $config = getOrderStatusMaster($status_key);
                     ?>
                         <div class="timeline-v2-item">
                             <div class="timeline-v2-icon" style="background: <?= $config['color'] ?>;">
@@ -223,7 +229,7 @@ function getOrderStatusMaster($status)
                     <div class="address-card">
                         <strong>Họ tên: <?= htmlspecialchars($order['shipping_name']) ?></strong>
                         <p><strong>Sđt: </strong><?= $order['shipping_phone'] ?></p>
-                        <p><strong>Địa chỉ:</strong> <?= htmlspecialchars($order['shipping_address']) ?></p>
+                        <p style="text-transform: capitalize;"><strong>Địa chỉ:</strong> <?= htmlspecialchars($order['shipping_address']) ?></p>
                         <?php if ($order['note']): ?>
                             <p class="order-note" style="text-transform: capitalize;"><strong>Ghi chú:</strong> <?= htmlspecialchars($order['note']) ?></p>
                         <?php endif; ?>

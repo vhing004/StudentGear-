@@ -262,53 +262,7 @@ $recent_orders = $conn->query($sql_recent_orders);
                 </tbody>
             </table>
         </section>
-
-        <!-- Đơn hàng gần đây -->
-        <section class="table-container" style="margin-top: 30px;">
-            <div class="table-header">
-                <h5>Đơn đặt hàng gần đây</h5>
-                <a href="./pages/orders.php" class="view-all">Xem tất cả</a>
-            </div>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Mã đơn</th>
-                        <th>Khách hàng</th>
-                        <th>Tổng tiền</th>
-                        <th>Trạng thái</th>
-                        <th>Ngày đặt</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    // Reset con trỏ để lấy lại dữ liệu
-                    $recent_orders = $conn->query($sql_recent_orders);
-                    while ($row = $recent_orders->fetch_assoc()):
-                    ?>
-                        <tr>
-                            <td><strong>#<?= $row['order_code']; ?></strong></td>
-                            <td><?= htmlspecialchars($row['fullname']); ?></td>
-                            <td><?= number_format($row['total_price'], 0, ',', '.'); ?>₫</td>
-                            <td>
-                                <span class="status-badge badge-<?= ($row['status'] == 'pending') ? 'warning' : 'success'; ?>">
-                                    <?= $row['status']; ?>
-                                </span>
-                            </td>
-                            <td><?= date('d/m/Y H:i', strtotime($row['created_at'])); ?></td>
-                            <td>
-                                <a href="order_detail.php?id=<?= $row['id']; ?>" class="action-link">
-                                    <i class="fas fa-eye"></i> Chi tiết
-                                </a>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        </section>
-
     </main>
-
 </body>
 
 </html>
