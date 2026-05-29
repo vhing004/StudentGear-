@@ -249,7 +249,7 @@ $res_orders = $stmt_orders->get_result();
                                         <button
                                             onclick="openReasonModal(<?= $order['id'] ?>, 'return', 'Yêu cầu Trả hàng / Hoàn tiền', <?= $order['total_price'] ?>)"
                                             class="btn"
-                                            style="background:#ffc107;color:#212529;border:none;cursor:pointer;">
+                                            style="background:#ffc107;color:#212529;border:none;cursor:pointer;padding: 15px 30px;">
                                             Trả Hàng / Hoàn Tiền
                                         </button>
                                         <a href="../handler/reorder_process.php?order_id=<?= $order['id'] ?>"
