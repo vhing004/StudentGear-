@@ -174,7 +174,7 @@ $res_orders = $stmt_orders->get_result();
                                 </span>
                             </div>
 
-                            <div class="actions" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+                            <div class="actions" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content: flex-end;">
                                 <?php if ($has_request): ?>
                                     <?php if ($has_request['status'] === 'pending'): ?>
                                         <div>
