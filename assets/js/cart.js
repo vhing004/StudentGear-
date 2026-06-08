@@ -96,3 +96,54 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
+
+// Hàm tăng giảm số lượng trực quan
+// function changeCartQty(button, change, maxStock) {
+//   const input = button.parentElement.querySelector(".qty-input");
+//   let currentVal = parseInt(input.value) || 1;
+//   let newVal = currentVal + change;
+
+//   if (newVal < 1) newVal = 1;
+//   if (newVal > maxStock) newVal = maxStock;
+
+//   input.value = newVal;
+// }
+
+// // Kiểm tra số lượng người dùng tự nhập vào ô
+// function validateCartQty(input, maxStock) {
+//   let val = parseInt(input.value) || 1;
+//   if (val < 1) val = 1;
+//   if (val > maxStock) val = maxStock;
+//   input.value = val;
+// }
+
+// Hàm gửi tất cả dữ liệu số lượng lên handler/update_cart.php khi bấm nút cập nhật
+function submitAllCartForms() {
+  // Tìm form đầu tiên để lấy làm form chính gửi đi
+  const mainForm = document.querySelector(".cart-item-form");
+  if (!mainForm) return;
+
+  // Thu thập toàn bộ các ô input số lượng từ các dòng sản phẩm khác gộp chung vào form chính
+  const allForms = document.querySelectorAll(".cart-item-form");
+  allForms.forEach((form) => {
+    if (form !== mainForm) {
+      const inputs = form.querySelectorAll("input");
+      inputs.forEach((input) => {
+        // Tạo thẻ sao chép ẩn để gom chung dữ liệu
+        const cloneInput = input.cloneNode(true);
+        cloneInput.type = "hidden";
+        mainForm.appendChild(cloneInput);
+      });
+    }
+  });
+
+  // Tạo thêm biến nhận diện nút hành động "update_cart_action" cho PHP nhận biết
+  const actionInput = document.createElement("input");
+  actionInput.type = "hidden";
+  actionInput.name = "update_cart_action";
+  actionInput.value = "1";
+  mainForm.appendChild(actionInput);
+
+  // Thực hiện reload và đẩy dữ liệu đồng bộ sang backend
+  mainForm.submit();
+}

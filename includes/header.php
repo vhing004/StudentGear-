@@ -19,14 +19,22 @@ $res_categories = $conn->query($sql_categories);
 // Lấy giá trị search từ URL nếu có
 $search_value = isset($_GET['search']) ? htmlspecialchars(trim($_GET['search'])) : '';
 
-// 2. Tính tổng số lượng sản phẩm trong giỏ hàng của người dùng hiện tại
+// 2. Tính tổng số lượng sản phẩm trong giỏ hàng của người dùng hiện tại VÀ LẤY AVATAR
 $cart = 0;
+$user_avatar = ''; // Thêm biến lưu đường dẫn avatar
+
 if (isset($_SESSION['user_id'])) {
     $u_id = (int)$_SESSION['user_id'];
-    $sql_cart = "SELECT SUM(quantity) AS total_quantity FROM cart WHERE user_id = $u_id";
-    $result_cart = $conn->query($sql_cart);
-    if ($result_cart && $row_cart = $result_cart->fetch_assoc()) {
-        $cart = $row_cart['total_quantity'] ?? 0;
+
+    // Tối ưu gộp chung câu lệnh lấy cả tổng giỏ hàng và ảnh đại diện cùng lúc
+    $sql_user_info = "SELECT 
+                        (SELECT SUM(quantity) FROM cart WHERE user_id = $u_id) AS total_quantity,
+                        (SELECT avatar FROM users WHERE id = $u_id) AS avatar";
+
+    $result_info = $conn->query($sql_user_info);
+    if ($result_info && $row_info = $result_info->fetch_assoc()) {
+        $cart = $row_info['total_quantity'] ?? 0;
+        $user_avatar = $row_info['avatar'] ?? ''; // Lấy dữ liệu trường avatar
     }
 }
 ?>
@@ -60,7 +68,7 @@ if (isset($_SESSION['user_id'])) {
                     </form>
 
                     <div class="header_menu">
-                        <a href="<?php echo BASE_URL; ?>pages/cart.php" class="header_menu-btn header_cart">
+                        <a href="<?php echo BASE_URL; ?>pages/profile.php" class="header_menu-btn header_cart">
                             <div class="header_cart-wrap">
                                 <i class="fa-solid fa-shopping-cart"></i>
                                 <span class="header_cart-notice">
@@ -74,7 +82,12 @@ if (isset($_SESSION['user_id'])) {
                             <?php if (isset($_SESSION['user_id'])): ?>
                                 <div class="header_user">
                                     <div class="header_user-info">
-                                        <i class="fa-solid fa-user-graduate"></i>
+                                        <?php if (!empty($user_avatar)): ?>
+                                            <img class="header-avatar" src="<?php echo BASE_URL . htmlspecialchars($user_avatar); ?>"
+                                                alt="Avatar">
+                                        <?php else: ?>
+                                            <i class="fa-solid fa-user-graduate"></i>
+                                        <?php endif; ?>
                                         <span class="header_user-name"><?php echo htmlspecialchars($_SESSION['fullname']); ?></span>
                                     </div>
 
@@ -121,3 +134,50 @@ if (isset($_SESSION['user_id'])) {
             </div>
         </div>
     </header>
+    <div id="global-toast" class="global-toast-alert toast-hidden">
+        <i id="global-toast-icon" class="fas fa-check-circle"></i>
+        <span id="global-toast-msg"></span>
+    </div>
+
+    <script>
+        // 1. Hàm hiển thị Toast bằng JavaScript (Dành cho luồng chạy AJAX phản hồi)
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('global-toast');
+            const toastMsg = document.getElementById('global-toast-msg');
+            const toastIcon = document.getElementById('global-toast-icon');
+
+            if (!toast || !toastMsg) return;
+
+            // Đổ nội dung thông báo động
+            toastMsg.innerText = message;
+
+            // Đổi màu sắc giao diện tương ứng theo type
+            if (type === 'success') {
+                toastIcon.className = "fas fa-check-circle";
+                toast.className = "global-toast-alert alert-success";
+            } else {
+                toastIcon.className = "fas fa-exclamation-circle";
+                toast.className = "global-toast-alert alert-danger";
+            }
+
+            // Hiện Toast gỡ bỏ class ẩn
+            toast.classList.remove('toast-hidden');
+
+            // Đặt bộ đếm thời gian: Đúng 3 giây (3000ms) sẽ tự động biến mất
+            if (window.globalToastTimeout) clearTimeout(window.globalToastTimeout);
+            window.globalToastTimeout = setTimeout(function() {
+                toast.classList.add('toast-hidden');
+            }, 3000);
+        }
+
+        // 2. Tự động kiểm tra hiển thị khi trang vừa load xong (Dành cho luồng đồng bộ PHP Session)
+        document.addEventListener('DOMContentLoaded', function() {
+            <?php if (isset($_SESSION['success'])): ?>
+                showToast("<?= $_SESSION['success'] ?>", 'success');
+                <?php unset($_SESSION['success']); ?>
+            <?php elseif (isset($_SESSION['error'])): ?>
+                showToast("<?= $_SESSION['error'] ?>", 'error');
+                <?php unset($_SESSION['error']); ?>
+            <?php endif; ?>
+        });
+    </script>

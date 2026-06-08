@@ -286,3 +286,50 @@
     gap: 30px;
   }
 }
+
+.cart-toast-alert {
+  position: fixed;
+  top: 25px;
+  right: 25px;
+  padding: 16px 24px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
+}
+
+/* Hiệu ứng ẩn đi mượt mà */
+.cart-toast-alert.toast-hidden {
+  opacity: 0;
+  transform: translateY(-20px);
+  pointer-events: none;
+}
+
+/* Giao diện khi thành công (Xanh lá) */
+.cart-toast-alert.alert-success {
+  background-color: #def7ec;
+  color: #03543f;
+  border-left: 5px solid #31c48d;
+}
+.cart-toast-alert.alert-success i {
+  color: #31c48d;
+}
+
+/* Giao diện khi thất bại (Đỏ) */
+.cart-toast-alert.alert-danger {
+  background-color: #fde8e8;
+  color: #9b1c1c;
+  border-left: 5px solid #f98080;
+}
+.cart-toast-alert.alert-danger i {
+  color: #f98080;
+}

@@ -1,8 +1,7 @@
 <?php
 session_start();
 require_once '../config/db.php';
-include_once "../includes/header.php";
-
+include_once "../includes/header.php"; // Chứa hệ thống mã Global Toast
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: " . BASE_URL . "auth/login.php");
@@ -17,7 +16,7 @@ $sql = "SELECT c.id as cart_id, c.quantity,
         FROM cart c
         JOIN products p ON c.product_id = p.id
         WHERE c.user_id = ?
-        ORDER BY c.added_at DESC";
+        ORDER BY c.id DESC"; // Sắp xếp theo ID giỏ hàng mới nhất
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
@@ -28,101 +27,95 @@ $cart_items = [];
 $total = 0;
 
 while ($row = $result->fetch_assoc()) {
-    // Tính giá khuyến mãi cho từng sản phẩm[cite: 1]
     $old_price = (float)$row['price'];
     $discount = (float)$row['discount_percent'];
     $current_price = ($discount > 0) ? $old_price * (1 - ($discount / 100)) : $old_price;
 
-    // Lưu giá thực tế và tính tạm tính mới
     $row['current_price'] = $current_price;
     $row['subtotal'] = $current_price * $row['quantity'];
-
-    $cart_items[] = $row;
     $total += $row['subtotal'];
+    $cart_items[] = $row;
 }
 ?>
 
-<section class="cart-page">
+<section class="cart-page-section">
     <div class="container">
-        <h1 class="cart-title">GIỎ HÀNG</h1>
+        <h2 class="page-title">Giỏ Hàng Của Bạn</h2>
 
         <?php if (empty($cart_items)): ?>
-            <div class="empty-cart">
-                <p>Giỏ hàng của bạn đang trống!</p>
-                <a href="<?= BASE_URL ?>index.php" class="btn btn-primary">Tiếp tục mua sắm</a>
+            <div class="cart-empty text-center py-5">
+                <i class="fa-solid fa-basket-shopping" style="font-size: 48px; color: #ccc; margin-bottom: 15px;"></i>
+                <p>Giỏ hàng của bạn đang trống.</p>
+                <a href="<?= BASE_URL ?>" class="btn btn-primary mt-3">Tiếp tục mua sắm</a>
             </div>
         <?php else: ?>
 
-            <div class="cart-content">
-                <!-- Danh sách sản phẩm -->
-                <div class="cart-items">
-                    <form id="cart-form">
-                        <table class="cart-table">
-                            <thead>
+            <div class="cart-wrapper">
+                <div class="cart-table-container">
+                    <table class="cart-table">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Giá</th>
+                                <th>Số lượng</th>
+                                <th>Tạm tính</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($cart_items as $item): ?>
                                 <tr>
-                                    <th>SẢN PHẨM</th>
-                                    <th>GIÁ</th>
-                                    <th>SỐ LƯỢNG</th>
-                                    <th>TẠM TÍNH</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($cart_items as $item): ?>
-                                    <tr data-cart-id="<?= $item['cart_id'] ?>">
-                                        <td class="product-info">
-                                            <img src="<?= htmlspecialchars($item['image'] ?? '/assets/images/no-image.jpg') ?>"
-                                                alt="<?= htmlspecialchars($item['name']) ?>"
-                                                class="product-thumb">
-                                            <div>
-                                                <h4><?= htmlspecialchars($item['name']) ?></h4>
-                                            </div>
-                                        </td>
-                                        <td class="price" data-price="<?= $item['current_price'] ?>">
-                                            <div class="cart-price-box">
-                                                <?php if ($item['discount_percent'] > 0): ?>
-                                                    <del class="price-old" style="color: #858585;"><?= number_format($item['price'], 0, ',', '.') ?>₫</del><br>
-                                                <?php endif; ?>
-                                                <span class="price-current"><?= number_format($item['current_price'], 0, ',', '.') ?>₫</span>
-                                            </div>
-                                        </td>
-                                        <td class="quantity">
+                                    <td class="cart-product-info">
+                                        <img src="<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['name']) ?>">
+                                        <span class="product-name"><?= htmlspecialchars($item['name']) ?></span>
+                                    </td>
+                                    <td class="cart-product-price">
+                                        <?= number_format($item['current_price'], 0, ',', '.') ?>₫
+                                    </td>
+
+                                    <td class="cart-product-quantity">
+                                        <form class="cart-item-form" action="<?= BASE_URL ?>handler/update_cart.php" method="POST">
                                             <div class="quantity-control">
-                                                <button type="button" class="qty-btn minus" data-cart-id="<?= $item['cart_id'] ?>">-</button>
+                                                <input type="hidden" name="cart_items[<?= $item['cart_id'] ?>][cart_id]" value="<?= $item['cart_id'] ?>">
+
+                                                <button type="button" class="qty-btn minus" onclick="changeCartQty(this, -1, <?= $item['stock'] ?>)">-</button>
                                                 <input type="number"
-                                                    class="qty-input"
+                                                    name="cart_items[<?= $item['cart_id'] ?>][quantity]"
                                                     value="<?= $item['quantity'] ?>"
                                                     min="1"
                                                     max="<?= $item['stock'] ?>"
-                                                    data-cart-id="<?= $item['cart_id'] ?>">
-                                                <button type="button" class="qty-btn plus" data-cart-id="<?= $item['cart_id'] ?>">+</button>
+                                                    class="qty-input"
+                                                    onchange="validateCartQty(this, <?= $item['stock'] ?>)">
+                                                <button type="button" class="qty-btn plus" onclick="changeCartQty(this, 1, <?= $item['stock'] ?>)">+</button>
                                             </div>
-                                        </td>
-                                        <td class="subtotal" data-subtotal="<?= $item['subtotal'] ?>">
-                                            <?= number_format($item['subtotal'], 0, ',', '.') ?>₫
-                                        </td>
-                                        <td class="remove">
-                                            <button type="button" class="remove-btn" data-cart-id="<?= $item['cart_id'] ?>">
-                                                <a href="<?php echo BASE_URL; ?>handler/remove_from_cart.php?cart_id=<?= $item['cart_id'] ?>"> <i class="fa-solid fa-trash"></i></a>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </form>
+                                        </form>
+                                    </td>
 
-                    <div class="cart-actions">
-                        <a href="<?= BASE_URL ?>index.php" class="btn btn-outline">
-                            ← TIẾP TỤC XEM SẢN PHẨM
+                                    <td class="cart-product-subtotal">
+                                        <?= number_format($item['subtotal'], 0, ',', '.') ?>₫
+                                    </td>
+                                    <td class="cart-product-actions">
+                                        <a href="<?= BASE_URL ?>handler/remove_from_cart.php?cart_id=<?= $item['cart_id'] ?>"
+                                            class="btn-delete-item"
+                                            onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?')">
+                                            <i class="fa-solid fa-trash-can"></i> Xóa
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+
+                    <div class="cart-actions-row">
+                        <a href="<?= BASE_URL ?>" class="btn btn-continue">
+                            <i class="fa-solid fa-arrow-left"></i> TIẾP TỤC XEM SẢN PHẨM
                         </a>
-                        <button type="button" id="update-cart-btn" class="btn btn-secondary" onclick="submitCartUpdate()">
-                            CẬP NHẬT GIỎ HÀNG
+                        <button type="button" onclick="submitAllCartForms()" class="btn btn-update">
+                            <i class="fa-solid fa-rotate"></i> CẬP NHẬT GIỎ HÀNG
                         </button>
                     </div>
                 </div>
 
-                <!-- Cột tổng tiền -->
                 <div class="cart-summary">
                     <h3>CỘNG GIỎ HÀNG</h3>
                     <div class="summary-row">
@@ -134,8 +127,7 @@ while ($row = $result->fetch_assoc()) {
                         <span id="total"><?= number_format($total, 0, ',', '.') ?>₫</span>
                     </div>
 
-                    <a href="<?= BASE_URL ?>handler/buy_now.php?from_cart=1"
-                        class="btn btn-checkout">
+                    <a href="<?= BASE_URL ?>handler/buy_now.php?from_cart=1" class="btn btn-checkout">
                         TIẾN HÀNH THANH TOÁN
                     </a>
 
@@ -143,7 +135,7 @@ while ($row = $result->fetch_assoc()) {
                         <h4><i class="fa-solid fa-ticket"></i> Phiếu ưu đãi</h4>
                         <div class="coupon-input">
                             <input type="text" id="coupon_code" placeholder="Mã ưu đãi">
-                            <button id="apply-coupon">Áp dụng</button>
+                            <button type="button" id="apply-coupon">Áp dụng</button>
                         </div>
                     </div>
                 </div>
@@ -153,8 +145,7 @@ while ($row = $result->fetch_assoc()) {
     </div>
 </section>
 
+<script src="../assets/js/cart.js"></script>
 <?php
-include_once  "../includes/footer.php";
+include_once "../includes/footer.php";
 ?>
-
-<script src="<?= BASE_URL ?>assets/js/cart.js"></script>

@@ -1,30 +1,32 @@
 <?php
 session_start();
-require_once '../config/db.php';
-
-// Thiết lập phản hồi trả về định dạng JSON
-header('Content-Type: application/json');
+require_once '../config/db.php'; // Đảm bảo kết nối $conn và định nghĩa BASE_URL
 
 if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập!']);
+    $_SESSION['error'] = "Vui lòng đăng nhập để thực hiện hành động này!";
+    header("Location: " . BASE_URL . "auth/login.php");
     exit;
 }
 
 $user_id = $_SESSION['user_id'];
 
-// 1. Đọc dữ liệu JSON từ yêu cầu của JavaScript
-$inputData = json_decode(file_get_contents('php://input'), true);
+// Kiểm tra phương thức xử lý và nút bấm submit
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['update_cart_action'])) {
+    header("Location: " . BASE_URL . "pages/cart.php");
+    exit;
+}
 
-if (isset($inputData['cart_items']) && is_array($inputData['cart_items'])) {
-    $errors = 0;
+$errors = 0;
 
-    // Bắt đầu lặp qua từng sản phẩm để cập nhật
-    foreach ($inputData['cart_items'] as $item) {
+// Kiểm tra mảng dữ liệu gửi lên từ form
+if (isset($_POST['cart_items']) && is_array($_POST['cart_items'])) {
+
+    foreach ($_POST['cart_items'] as $item) {
         $cart_id  = (int)$item['cart_id'];
         $quantity = (int)$item['quantity'];
 
         if ($cart_id > 0 && $quantity > 0) {
-            // 2. Kiểm tra stock của sản phẩm đó trong Database[cite: 1, 2]
+            // 1. Kiểm tra giới hạn số lượng tồn kho của sản phẩm
             $sql_check = "SELECT p.stock 
                           FROM cart c 
                           JOIN products p ON c.product_id = p.id 
@@ -37,12 +39,12 @@ if (isset($inputData['cart_items']) && is_array($inputData['cart_items'])) {
             if ($result->num_rows > 0) {
                 $product = $result->fetch_assoc();
 
-                // Giới hạn số lượng theo tồn kho thực tế[cite: 1, 2]
+                // Nếu số lượng người dùng chỉnh sửa vượt quá kho, tự động gán bằng max kho
                 if ($quantity > $product['stock']) {
                     $quantity = $product['stock'];
                 }
 
-                // 3. Thực hiện cập nhật số lượng mới
+                // 2. Tiến hành cập nhật số lượng mới vào Database
                 $sql_update = "UPDATE cart SET quantity = ? WHERE id = ? AND user_id = ?";
                 $stmt_up = $conn->prepare($sql_update);
                 $stmt_up->bind_param("iii", $quantity, $cart_id, $user_id);
@@ -53,13 +55,15 @@ if (isset($inputData['cart_items']) && is_array($inputData['cart_items'])) {
             }
         }
     }
-
-    if ($errors === 0) {
-        echo json_encode(['success' => true, 'message' => 'Giỏ hàng đã được cập nhật!']);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Có ' . $errors . ' sản phẩm không thể cập nhật.']);
-    }
-} else {
-    echo json_encode(['success' => false, 'message' => 'Không tìm thấy dữ liệu để cập nhật.']);
 }
+
+// 3. Đóng gói thông báo vào Session tương ứng dựa theo kết quả xử lý
+if ($errors === 0) {
+    $_SESSION['success'] = "Giỏ hàng của bạn đã được cập nhật thành công!";
+} else {
+    $_SESSION['error'] = "Có lỗi xảy ra trong quá trình cập nhật số lượng giỏ hàng!";
+}
+
+// 4. CHUYỂN HƯỚNG QUAY TRỞ LẠI: Hệ thống Global Toast tại header.php sẽ tự động bắt được và hiển thị
+header("Location: " . BASE_URL . "pages/cart.php");
 exit;

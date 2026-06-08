@@ -158,9 +158,14 @@ $current_price = ($discount_percent > 0)
                             <button type="button" class="quantity-btn plus" onclick="changeQuantity(1)">+</button>
                         </div>
 
-                        <button type="submit"
+                        <!-- <button type="submit"
                             name="add_to_cart"
                             onclick="addToCart()"
+                            class="product-detail__btn product-detail__btn--add">
+                            <i class="fa-solid fa-cart-plus"></i> THÊM VÀO GIỎ HÀNG
+                        </button> -->
+                        <button type="submit"
+                            name="add_to_cart"
                             class="product-detail__btn product-detail__btn--add">
                             <i class="fa-solid fa-cart-plus"></i> THÊM VÀO GIỎ HÀNG
                         </button>
@@ -322,7 +327,71 @@ if ($res_categories->num_rows > 0):
 endif;
 ?>
 
+<!-- Toast Message -->
+<?php if (isset($_SESSION['success']) || isset($_SESSION['error'])): ?>
+    <?php
+    $is_success = isset($_SESSION['success']);
+    $toast_msg = $is_success ? $_SESSION['success'] : $_SESSION['error'];
+    $toast_class = $is_success ? 'alert-success' : 'alert-danger';
+    $toast_icon = $is_success ? 'fa-check-circle' : 'fa-exclamation-circle';
+
+    // Hiển thị xong thì xóa session đó ngay để lần sau load lại trang không bị hiện lại
+    unset($_SESSION['success']);
+    unset($_SESSION['error']);
+    ?>
+    <div id="cart-toast" class="cart-toast-alert <?= $toast_class ?>">
+        <i class="fas <?= $toast_icon ?>"></i>
+        <span><?= htmlspecialchars($toast_msg) ?></span>
+    </div>
+<?php endif; ?>
+
 <script>
+    const maxStock = <?= $product['stock'] ?>;
+
+    function changeQuantity(change) {
+        let qtyInput = document.getElementById('quantity');
+        let buyQtyInput = document.getElementById('buy_quantity');
+
+        let currentQty = parseInt(qtyInput.value) || 1;
+        let newQty = currentQty + change;
+
+        if (newQty < 1) newQty = 1;
+        if (newQty > maxStock) newQty = maxStock;
+
+        qtyInput.value = newQty;
+        buyQtyInput.value = newQty;
+    }
+
+    document.getElementById('quantity').addEventListener('change', function() {
+        let val = parseInt(this.value) || 1;
+        if (val < 1) val = 1;
+        if (val > maxStock) val = maxStock;
+
+        this.value = val;
+        document.getElementById('buy_quantity').value = val;
+    });
+
+    // =========================================================================
+    // TỰ ĐỘNG ẨN THÔNG BÁO TOAST SAU 3 GIÂY KHI TRANG TẢI XONG
+    // =========================================================================
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     const toast = document.getElementById('cart-toast');
+    //     if (toast) {
+    //         // Chờ đúng 3000ms (3 giây)
+    //         setTimeout(function() {
+    //             // Kích hoạt class làm mờ dần bằng CSS transition
+    //             toast.classList.add('toast-hidden');
+
+    //             // Chờ hiệu ứng mờ kết thúc (0.5s) rồi xóa phần tử khỏi giao diện
+    //             setTimeout(function() {
+    //                 toast.remove();
+    //             }, 500);
+    //         }, 3000);
+    //     }
+    // });
+</script>
+
+<!-- <script>
     const maxStock = <?= $product['stock'] ?>;
 
     function changeQuantity(change) {
@@ -363,7 +432,7 @@ endif;
         const form = document.getElementById('addToCartForm');
         form.submit();
     }
-</script>
+</script> -->
 <?php
 include_once "../includes/footer.php";
 ?>
