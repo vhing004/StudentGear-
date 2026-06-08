@@ -107,11 +107,6 @@ if (!$user) {
                     <label for="phone">Số điện thoại</label>
                     <input type="text" name="phone" id="phone" class="form-control" value="<?= htmlspecialchars($user['phone'] ?? '') ?>" placeholder="Nhập số điện thoại">
                 </div>
-
-                <div class="form-group full-width">
-                    <label for="address">Địa chỉ nhận hàng</label>
-                    <textarea name="address" id="address" class="form-control" rows="3" placeholder="Nhập số nhà, tên đường, phường/xã, quận/huyện..."><?= htmlspecialchars($user['address'] ?? '') ?></textarea>
-                </div>
             </div>
 
             <button type="submit" class="btn-submit">Lưu thay đổi</button>

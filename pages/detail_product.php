@@ -371,68 +371,8 @@ endif;
         document.getElementById('buy_quantity').value = val;
     });
 
-    // =========================================================================
-    // TỰ ĐỘNG ẨN THÔNG BÁO TOAST SAU 3 GIÂY KHI TRANG TẢI XONG
-    // =========================================================================
-    // document.addEventListener('DOMContentLoaded', function() {
-    //     const toast = document.getElementById('cart-toast');
-    //     if (toast) {
-    //         // Chờ đúng 3000ms (3 giây)
-    //         setTimeout(function() {
-    //             // Kích hoạt class làm mờ dần bằng CSS transition
-    //             toast.classList.add('toast-hidden');
-
-    //             // Chờ hiệu ứng mờ kết thúc (0.5s) rồi xóa phần tử khỏi giao diện
-    //             setTimeout(function() {
-    //                 toast.remove();
-    //             }, 500);
-    //         }, 3000);
-    //     }
-    // });
 </script>
 
-<!-- <script>
-    const maxStock = <?= $product['stock'] ?>;
-
-    function changeQuantity(change) {
-        let qtyInput = document.getElementById('quantity');
-        let buyQtyInput = document.getElementById('buy_quantity');
-
-        let currentQty = parseInt(qtyInput.value) || 1;
-        let newQty = currentQty + change;
-
-        // Giới hạn số lượng trong khoảng từ 1 đến maxStock
-        if (newQty < 1) newQty = 1;
-        if (newQty > maxStock) newQty = maxStock;
-
-        // Cập nhật giá trị cho CẢ HAI ô input
-        qtyInput.value = newQty;
-        buyQtyInput.value = newQty;
-    }
-
-    // Đảm bảo khi người dùng tự nhập số, hệ thống vẫn kiểm tra stock và đồng bộ
-    document.getElementById('quantity').addEventListener('change', function() {
-        let val = parseInt(this.value) || 1;
-        if (val < 1) val = 1;
-        if (val > maxStock) val = maxStock;
-
-        this.value = val;
-        document.getElementById('buy_quantity').value = val;
-    });
-
-    // Hàm xử lý khi bấm nút THÊM VÀO GIỎ
-    function addToCart() {
-        const quantity = document.getElementById('quantity').value;
-        const productId = <?= $product['id'] ?>;
-
-        // Hiển thị alert ngay lập tức
-        alert("Đã thêm " + quantity + " sản phẩm vào giỏ hàng!");
-
-        // Submit form để thực sự thêm vào database
-        const form = document.getElementById('addToCartForm');
-        form.submit();
-    }
-</script> -->
 <?php
 include_once "../includes/footer.php";
 ?>

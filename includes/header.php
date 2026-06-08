@@ -68,7 +68,7 @@ if (isset($_SESSION['user_id'])) {
                     </form>
 
                     <div class="header_menu">
-                        <a href="<?php echo BASE_URL; ?>pages/profile.php" class="header_menu-btn header_cart">
+                        <a href="<?php echo BASE_URL; ?>pages/cart.php" class="header_menu-btn header_cart">
                             <div class="header_cart-wrap">
                                 <i class="fa-solid fa-shopping-cart"></i>
                                 <span class="header_cart-notice">
@@ -78,43 +78,43 @@ if (isset($_SESSION['user_id'])) {
                                 </span>
                             </div>
                             <span class="header_menu-text">Giỏ hàng</span>
-
-                            <?php if (isset($_SESSION['user_id'])): ?>
-                                <div class="header_user">
-                                    <div class="header_user-info">
-                                        <?php if (!empty($user_avatar)): ?>
-                                            <img class="header-avatar" src="<?php echo BASE_URL . htmlspecialchars($user_avatar); ?>"
-                                                alt="Avatar">
-                                        <?php else: ?>
-                                            <i class="fa-solid fa-user-graduate"></i>
-                                        <?php endif; ?>
-                                        <span class="header_user-name"><?php echo htmlspecialchars($_SESSION['fullname']); ?></span>
-                                    </div>
-
-                                    <ul class="header_user-menu">
-                                        <li class="header_user-item">
-                                            <a href="<?php echo BASE_URL; ?>pages/profile.php">
-                                                <i class="fa-regular fa-user"></i> Tài khoản của tôi
-                                            </a>
-                                        </li>
-                                        <li class="header_user-item">
-                                            <a href="<?php echo BASE_URL; ?>pages/history_order.php">
-                                                <i class="fa-solid fa-clipboard-list"></i> Đơn mua
-                                            </a>
-                                        </li>
-                                        <li class="header_user-item header_user-item--separate">
-                                            <a href="<?php echo BASE_URL; ?>auth/logout.php">
-                                                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
-                                            </a>
-                                        </li>
-                                    </ul>
+                        </a>
+                        <?php if (isset($_SESSION['user_id'])): ?>
+                            <a href="<?php echo BASE_URL; ?>/pages/profile.php" class="header_user">
+                                <div class="header_user-info">
+                                    <?php if (!empty($user_avatar)): ?>
+                                        <img class="header-avatar" src="<?php echo BASE_URL . htmlspecialchars($user_avatar); ?>"
+                                            alt="Avatar">
+                                    <?php else: ?>
+                                        <i class="fa-solid fa-user-graduate"></i>
+                                    <?php endif; ?>
+                                    <span class="header_user-name"><?php echo htmlspecialchars($_SESSION['fullname']); ?></span>
                                 </div>
-                            <?php else: ?>
-                                <a href="<?php echo BASE_URL; ?>auth/login.php" class="header_menu-btn" id="openLogin">
-                                    <i class="fa-regular fa-circle-user"></i>
-                                    <span class="header_menu-text">Đăng nhập</span>
-                                </a>
-                            <?php endif; ?>
+
+                                <ul class="header_user-menu">
+                                    <li class="header_user-item">
+                                        <a href="<?php echo BASE_URL; ?>pages/profile.php">
+                                            <i class="fa-regular fa-user"></i> Tài khoản của tôi
+                                        </a>
+                                    </li>
+                                    <li class="header_user-item">
+                                        <a href="<?php echo BASE_URL; ?>pages/history_order.php">
+                                            <i class="fa-solid fa-clipboard-list"></i> Đơn mua
+                                        </a>
+                                    </li>
+                                    <li class="header_user-item header_user-item--separate">
+                                        <a href="<?php echo BASE_URL; ?>auth/logout.php">
+                                            <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                                        </a>
+                                    </li>
+                                </ul>
+                            </a>
+                        <?php else: ?>
+                            <a href="<?php echo BASE_URL; ?>auth/login.php" class="header_menu-btn" id="openLogin">
+                                <i class="fa-regular fa-circle-user"></i>
+                                <span class="header_menu-text">Đăng nhập</span>
+                            </a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </nav>
