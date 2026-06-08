@@ -555,7 +555,7 @@ function getStatusBadge($status)
                     <h4 style="margin-bottom: 6px; color: #dd6b20;"><i class="fas fa-truck"></i> Địa chỉ nhận hàng thực tế</h4>
                     <p>Người nhận: <span id="ship_name"></span></p>
                     <p>Số điện thoại: <span id="ship_phone"></span></p>
-                    <p>Địa chỉ giao: <span id="ship_address"></span></p>
+                    <p>Địa chỉ giao: <span style="text-transform: capitalize;" id="ship_address"></span></p>
                 </div>
             </div>
             <div style="margin-top: 12px; padding: 10px; background: #ebf8ff; border-left: 4px solid #3182ce; border-radius: 0 4px 4px 0;">
