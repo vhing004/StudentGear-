@@ -80,7 +80,7 @@ if (isset($_SESSION['user_id'])) {
                             <span class="header_menu-text">Giỏ hàng</span>
                         </a>
                         <?php if (isset($_SESSION['user_id'])): ?>
-                            <a href="<?php echo BASE_URL; ?>/pages/profile.php" class="header_user">
+                            <div class="header_user">
                                 <div class="header_user-info">
                                     <?php if (!empty($user_avatar)): ?>
                                         <img class="header-avatar" src="<?php echo BASE_URL . htmlspecialchars($user_avatar); ?>"
@@ -108,7 +108,7 @@ if (isset($_SESSION['user_id'])) {
                                         </a>
                                     </li>
                                 </ul>
-                            </a>
+                            </div>
                         <?php else: ?>
                             <a href="<?php echo BASE_URL; ?>auth/login.php" class="header_menu-btn" id="openLogin">
                                 <i class="fa-regular fa-circle-user"></i>

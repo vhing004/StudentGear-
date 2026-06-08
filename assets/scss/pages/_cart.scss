@@ -216,3 +216,9 @@
 .input-qty {
   text-align: center;
 }
+
+.cart-product-actions {
+  & a {
+    color: $primary-color;
+  }
+}
